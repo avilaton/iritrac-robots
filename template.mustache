@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">	
+	<Document>
+		<Style id="Tline">
+			<LineStyle>
+				<color>ff5f36e1</color>
+				<width>3</width>
+			</LineStyle>
+		</Style>
+		<Style id="TPoint">
+			<IconStyle>
+				<Icon>http://maps.google.com/mapfiles/kml/shapes/placemark_square.png</Icon>
+				<scale>0.4</scale>
+				<color>ff5f36e1</color>
+			</IconStyle>
+		</Style>
+		<Folder>
+			<name>IriTrace</name>
+			<open>1</open>
+			<Folder>
+				<name>Filename: {{filename}}</name>
+				<open>1</open>
+				{{#points}}
+				<Placemark id="{{id}}">
+					<description>Date: {{timestamp}} Speed: {{speed}} km/h, NumTrace: {{numtrace}}</description>
+					<styleUrl>#TPoint</styleUrl>
+					<Point>
+						<coordinates>{{lon}},{{lat}}</coordinates>
+					</Point>
+				</Placemark>
+				{{/points}}
+				<Placemark id="tr">
+					<name>TRACE</name>
+					<styleUrl>#Tline</styleUrl>
+					<LineString>
+						<extrude>1</extrude>
+						<tessellate>1</tessellate>
+						<coordinates>
+						{{#points}}{{lon}},{{lat}} {{/points}}
+						</coordinates>
+					</LineString>
+				</Placemark>
+			</Folder>
+		</Folder>
+	</Document>
+</xml>
