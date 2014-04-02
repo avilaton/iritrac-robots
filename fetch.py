@@ -8,9 +8,32 @@ import urllib
 import urllib2
 import cookielib
 import sqlite3
-
+from time import mktime
+from datetime import datetime
 COOKIEFILE = 'cookies.lwp'
+def FechaInicial():
+        
+	dia_inicial = raw_input("Dia Desde en ""dd"": ")
+	mes_inicial = raw_input("Mes Desde en ""MM"": ")
+	ano_inicial = raw_input("Ano Desde en ""YYYY"": ")
+	hora_inicial = raw_input("Hora Desde en ""HH"": ")
+	minuto_inicial = raw_input("Minuto Desde en ""mm"": ")
+	fecha_inicial = dia_inicial + '/' + mes_inicial + '/' + ano_inicial + " " + hora_inicial + ':' + minuto_inicial
+	t = datetime.strptime(fecha_inicial, '%d/%m/%Y %H:%M')
+	timeunix = mktime(t.timetuple())
+	return timeunix
 
+def FechaFinal():
+	dia_final = raw_input("Dia Hasta en ""dd"": ")
+	mes_final = raw_input("Mes Hasta en ""MM"": ")
+	ano_final = raw_input("Ano Hasta en ""YYYY"": ")
+	hora_final = raw_input("Hora Hasta en ""HH"": ")
+	minuto_final = raw_input("Minuto Hasta ""mm"": ")
+	fecha_final = dia_final+ '/' + mes_final + '/' + ano_final + " " + hora_final + ':' + minuto_final
+	t = datetime.strptime(fecha_final, '%d/%m/%Y %H:%M')
+	timeunix = mktime(t.timetuple())
+	return timeunix
+      
 def parseXls(filename):
     global ncols
     global nrows
@@ -132,8 +155,11 @@ def downloadXls():
     response = opener.open('http://tracking.iritrack.com/index.php', data)
     html = response.read()
     cj.save()
-    query = {'page':'positions.xl','name':'positions-603','vehicle':'603',
-    'date_from':1363910400,'date_to':1395532799,'time_from':1363910400,'time_to':1395532799}
+    fecha_inicial = FechaInicial()
+    fecha_final = FechaFinal()
+    vehiculo = raw_input("Ingrese numero de vehiculo: ")
+    query = {'page':'positions.xl','name':'positions-1','vehicle':vehiculo,
+    'date_from':fecha_inicial,'date_to':fecha_final,'time_from':fecha_inicial,'time_to':fecha_final}
     data = urllib.urlencode(query)
     excelResponse = opener.open('http://tracking.iritrack.com/index.php?'+data)
     xls = excelResponse.read()
@@ -142,8 +168,7 @@ def downloadXls():
 
 if __name__ == '__main__':
         
-        #downloadXls()
-        db = createDb('tabla.sqlite')
-        rows = parseXls('data.xls')
-        insertRows(rows)
-
+        downloadXls()
+        #db = createDb('tabla.sqlite')
+        #rows = parseXls('data.xls')
+        #insertRows(rows)
