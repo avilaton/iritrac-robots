@@ -114,14 +114,7 @@ def createDb(filename):
 
 def insertRows(db, rows):
     cursor = db.cursor()
-    # for row in rows:
-    #     print row
     headers = rows[0].keys()
-    print headers
-
-    print len(rows)
-    # insert_query = 'insert into data values %s'%str(tuple(sim)).replace("'","")
-
 
     for row in rows:
         insert_query = """INSERT INTO data 
@@ -136,9 +129,8 @@ def insertRows(db, rows):
         cursor.execute(insert_query)
 
     db.commit()
-    
-    
 
+    # insert_query = 'insert into data values %s'%str(tuple(sim)).replace("'","")
 
     # for i in range(nrows):
     #     valores = []
@@ -167,13 +159,13 @@ def login():
 
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 
-    # username = raw_input("Please enter your username: ")
-    # password = raw_input("Please enter your password: ")
-    # query = {'username': username,'password': password,'valid': 'OK'}
-    # data = urllib.urlencode(query) 
-    # response = opener.open('http://tracking.iritrack.com/index.php', data)
-    # html = response.read()
-    # cj.save()
+    username = raw_input("Please enter your username: ")
+    password = raw_input("Please enter your password: ")
+    query = {'username': username,'password': password,'valid': 'OK'}
+    data = urllib.urlencode(query) 
+    response = opener.open('http://tracking.iritrack.com/index.php', data)
+    html = response.read()
+    cj.save()
     return opener
 
 def downloadXls(opener):
@@ -187,15 +179,15 @@ def downloadXls(opener):
         'date_from':1363910400,'date_to':1395532799,'time_from':1363910400,'time_to':1395532799}
     data = urllib.urlencode(query)
     excelResponse = opener.open('http://tracking.iritrack.com/index.php?'+data)
-    # print excelResponse.info().getheader('Content-Type')
+    print excelResponse.info().getheader('Set-Cookie')
     xls = excelResponse.read()
     with open('data/'+vehicle+'.xls','wb') as f:
         f.write(xls)
 
 if __name__ == '__main__':
     db = createDb('tabla.sqlite')
-    # opener = login()
-    # downloadXls(opener)
+    opener = login()
+    downloadXls(opener)
     rows = parseXls('data/603.xls')
     insertRows(db, rows)
     db.close()
