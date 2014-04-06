@@ -9,90 +9,77 @@ import urllib2
 import cookielib
 import sqlite3
 from time import mktime
-from datetime import datetime
-COOKIEFILE = 'cookies.lwp'
-def FechaInicial():
-        
-	dia_inicial = raw_input("Dia Desde en ""dd"": ")
-	mes_inicial = raw_input("Mes Desde en ""MM"": ")
-	ano_inicial = raw_input("Ano Desde en ""YYYY"": ")
-	hora_inicial = raw_input("Hora Desde en ""HH"": ")
-	minuto_inicial = raw_input("Minuto Desde en ""mm"": ")
-	fecha_inicial = dia_inicial + '/' + mes_inicial + '/' + ano_inicial + " " + hora_inicial + ':' + minuto_inicial
-	t = datetime.strptime(fecha_inicial, '%d/%m/%Y %H:%M')
-	timeunix = mktime(t.timetuple())
-	return timeunix
+from datetime import *
 
-def FechaFinal():
-	dia_final = raw_input("Dia Hasta en ""dd"": ")
-	mes_final = raw_input("Mes Hasta en ""MM"": ")
-	ano_final = raw_input("Ano Hasta en ""YYYY"": ")
-	hora_final = raw_input("Hora Hasta en ""HH"": ")
-	minuto_final = raw_input("Minuto Hasta ""mm"": ")
-	fecha_final = dia_final+ '/' + mes_final + '/' + ano_final + " " + hora_final + ':' + minuto_final
-	t = datetime.strptime(fecha_final, '%d/%m/%Y %H:%M')
-	timeunix = mktime(t.timetuple())
-	return timeunix
+def FechaDesde():
+    dia_desde = raw_input("Dia Desde en ""dd"": ")
+    mes_desde = raw_input("Mes Desde en ""MM"": ")
+    ano_desde = raw_input("Ano Desde en ""YYYY"": ")
+    hora_desde = raw_input("Hora Desde en ""HH"": ")
+    minuto_desde = raw_input("Minuto Desde en ""mm"": ")
+    #dia_inicial='05'
+    #mes_inicial='04'
+    #ano_inicial='2014'
+    #minuto_inicial='00'
+    fecha_desde = dia_desde + '/' + mes_desde + '/' + ano_desde + " " + hora_desde + ':' + minuto_desde
+    t = datetime.strptime(fecha_desde, '%d/%m/%Y %H:%M')
+    t = t - timedelta(hours=3) #Convierto a UTC - 3
+    timeunix = mktime(t.timetuple())
+    return timeunix
+
+def FechaHasta():
+    dia_hasta = raw_input("Dia Hasta en ""dd"": ")
+    mes_hasta = raw_input("Mes Hasta en ""MM"": ")
+    ano_hasta = raw_input("Ano Hasta en ""YYYY"": ")
+    hora_hasta = raw_input("Hora Hasta en ""HH"": ")
+    minuto_hasta = raw_input("Minuto Hasta ""mm"": ")
+    #dia_final='05'
+    #mes_final='04'
+    #ano_final='2014'
+    #minuto_final='00'
+    fecha_hasta = dia_hasta+ '/' + mes_hasta + '/' + ano_hasta + " " + hora_hasta + ':' + minuto_hasta
+    t = datetime.strptime(fecha_hasta, '%d/%m/%Y %H:%M')
+    t = t - timedelta(hours=3) #Convierto a UTC - 3
+    timeunix = mktime(t.timetuple())
+    return timeunix
       
 def parseXls(filename):
-    global ncols
-    global nrows
-    global columnas_vacias
-    global sheet
-    global columnas
-    global sim
+
     doc = xlrd.open_workbook(filename) #abro el .xls
     sheet = doc.sheet_by_index(0) #Genera el objeto
-    nrows = sheet.nrows #Guarda en nrows la cantidad de Filas
-    ncols = sheet.ncols #Guarda en ncols la cantidad de Columnas
+
+    
     tipos_datos = {0: 'TEXT',
                  1: 'TEXT',
                  2: 'REAL',
                  3: 'REAL',
                  4: 'INTEGER',
                 }
-    #Obtener la estructura de la tabla
-    
-    tabla = {}
-    nombre_de_columnas=[]
-    columnas = []
-    sim = []
-    columnas_vacias = []
-    for i in range(ncols):
-        nombre = sheet.cell_value(0,i)
-        if str(nombre) != '':
-            ctype = sheet.cell_type(1,i)
-            columnas.append(str(nombre))
-            nombre_de_columnas.append('%s %s'%(str(nombre), tipos_datos[ctype]))
-            sim.append('?')
-        else:
-            columnas_vacias.append(i)
-
+   
     headers = []
-    for i in range(ncols):
+    for i in range(sheet.ncols):
         name = sheet.cell_value(0,i)
-        headers.append(name.split(' ')[0])
-        
-    rows = []
+        headers.append(str(name.split(' ')[0]))
 
-    for i in range(nrows-1):
+    # extrae todas las filas
+    rows = []
+    for i in range(sheet.nrows-1):
         row = [sheet.cell_value(i+1,j) for j in range(len(headers))]
         rows.append(row)
-        
-    dictArray = []
     
+    # convierte headers + rows en un array de diccionarios
+    dictArray = []
     for row in rows:
-        dictArray = {k:row[j] for j,k in enumerate(headers)}
+        dictionary = {k:row[j] for j,k in enumerate(headers)}
+        dictArray.append(dictionary)
         
     return dictArray
 
 def createDb(filename):
     #Trata de crear la tabla y si ya está creada, sigue
-    global cursor
-    global conn
+    conn = sqlite3.connect(filename)
+    cursor = conn.cursor()
     try:
-        conn = sqlite3.connect(filename)
-        cursor = conn.cursor()
         cursor.execute (''' CREATE TABLE data
                 (Alpha TEXT,
                 DATE TEXT,
@@ -102,43 +89,38 @@ def createDb(filename):
                 ALTITUD TEXT,
                 EVENT TEXT,
                 ZONE TEXT)''')
-        print "Tabla creada con Ã©xito"
+        print "Tabla creada"
         conn.commit()
     except:
         print "Tabla ya creada"
 
     return conn
 
-def insertRows(rows):
+def insertRows(db, rows):
     
-    # headers = rows[0].keys()
+    cursor = db.cursor()
+    try:
+        headers = rows[0].keys()
+        print "Almacenando datos....."
+        for row in rows:
+            insert_query = """INSERT INTO data 
+                VALUES ('{Alpha}',
+                    '{Date}',
+                    '{Latitude}',
+                    '{Longitude}',
+                    '{Speed}',
+                    '{Altitude}',
+                    '{Event}',
+                    '{Zone}')""".format(**row)
+            cursor.execute(insert_query)
 
-    for row in rows:
-        print row
-    print nrows , " #########" 
-    #insert_query = """INSERT INTO data 
-    #    VALUES ({Alpha},{Datetime},{lat})""".format(Alpha=1, Datetime=21341, lat=123312)
-    insert_query = 'insert into data values %s'%str(tuple(sim)).replace("'","")
-
-    print insert_query
-       
-    for i in range(nrows):
-        valores = []
-        for j in range(ncols):
-            if j not in columnas_vacias:
-                valor = sheet.cell_value(i,j)
-                if str(valor) not in columnas:
-                    valores.append(str(valor))
-                else:
-                    break;
-        print valores
-        if valores != []:
-             cursor.execute(insert_query,tuple(valores))
-             conn.commit()
+        db.commit()
+        print "Datos guardados en BD"
+    except:
+        print "No se encotro informacion"
     
-    
-    
-def downloadXls():
+def login():
+    COOKIEFILE = 'cookies.lwp'
     # cj = cookielib.CookieJar()
     # this cookie jar stores the login cookie to a file. Should be checked for existence, 
     # and validity and if it is not valid, ask the user to login again.
@@ -148,27 +130,69 @@ def downloadXls():
 
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 
-    username = raw_input("Please enter your username: ")
-    password = raw_input("Please enter your password: ")
+    #username = raw_input("Please enter your username: ")
+    #password = raw_input("Please enter your password: ")
+    username = 'ruta2'
+    password = 'DESAFIO'
     query = {'username': username,'password': password,'valid': 'OK'}
     data = urllib.urlencode(query) 
     response = opener.open('http://tracking.iritrack.com/index.php', data)
     html = response.read()
     cj.save()
-    fecha_inicial = FechaInicial()
-    fecha_final = FechaFinal()
-    vehiculo = raw_input("Ingrese numero de vehiculo: ")
+    
+    return opener
+
+def downloadXls(opener,fecha_desde,fecha_hasta,vehiculo):
+    print "Buscando datos....."
     query = {'page':'positions.xl','name':'positions-1','vehicle':vehiculo,
-    'date_from':fecha_inicial,'date_to':fecha_final,'time_from':fecha_inicial,'time_to':fecha_final}
+    'date_from':fecha_desde,'date_to':fecha_hasta,'time_from':fecha_desde,'time_to':fecha_hasta}
+    #vehicle = '603'
+    #query = {'page':'positions.xl','name':'positions-1','vehicle': vehiculo,
+    #   'date_from':1363910400,'date_to':1395532799,'time_from':1363910400,'time_to':1395532799}
     data = urllib.urlencode(query)
     excelResponse = opener.open('http://tracking.iritrack.com/index.php?'+data)
-    xls = excelResponse.read()
-    with open('data.xls','wb') as f:
-        f.write(xls)
-
+    #print excelResponse.info().getheader('Set-Cookie')
+    try: 
+        xls = excelResponse.read()
+        with open('data'+vehiculo+'.xls','wb') as f:
+            f.write(xls)   
+    except:
+        print "No se pudo leer o generar el archivo."
+        #exit()
+def Update(db,opener):
+    vehiculo = raw_input("Ingrese numero de vehiculo: ")
+    cursor = db.cursor()
+    query = "SELECT max(DATE) from data" #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
+    cursor.execute(query)
+    ultima_fecha = cursor.fetchone()
+    if ultima_fecha[0] is not None:
+        fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
+        fecha_desde = fecha_desde - timedelta(hours=3)
+        fecha_desde = fecha_desde + timedelta(seconds=1) #LE SUMO UN SEGUNDO PARA QUE BUSQUE UN SEGUNDO DPS DEL ULTIMO DATO
+        fecha_hasta = fecha_desde + timedelta(hours=1)
+        fecha_desde_unix = mktime(fecha_desde.timetuple())
+        fecha_hasta_unix = mktime(fecha_hasta.timetuple())
+        try:
+            downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+            rows = parseXls('data'+vehiculo+'.xls')
+            insertRows(db, rows)
+        except:
+            print "No se registraron nuevos datos"
+    else:
+        print "Base de datos vacia"
+    db.close()
+        #exit()
 if __name__ == '__main__':
-        
-        downloadXls()
-        #db = createDb('tabla.sqlite')
-        #rows = parseXls('data.xls')
-        #insertRows(rows)
+    db = createDb('tabla.sqlite')
+    opener = login()
+    flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
+    if flag == 's':
+        vehiculo = raw_input("Ingrese numero de vehiculo: ")
+        fecha_desde = FechaDesde()
+        fecha_hasta = FechaHasta()
+        downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
+        rows = parseXls('data'+vehiculo+'.xls')
+        insertRows(db, rows)
+    else:
+        Update(db,opener)
+    db.close()
