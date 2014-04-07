@@ -43,7 +43,7 @@ def FechaHasta():
     timeunix = mktime(t.timetuple())
     return timeunix
       
-def parseXls(filename):
+def parseXls(filename,vehicle):
 
     doc = xlrd.open_workbook(filename) #abro el .xls
     sheet = doc.sheet_by_index(0) #Genera el objeto
@@ -60,11 +60,12 @@ def parseXls(filename):
     for i in range(sheet.ncols):
         name = sheet.cell_value(0,i)
         headers.append(str(name.split(' ')[0]))
-
+    headers.append('Vehicle') # Le agrego el header Vehicle, agrego una columna
     # extrae todas las filas
     rows = []
     for i in range(sheet.nrows-1):
-        row = [sheet.cell_value(i+1,j) for j in range(len(headers))]
+        row = [sheet.cell_value(i+1,j) for j in range(8)] #El antes estaba len(header). El len header total es de 9, pero agrego 8 + 1 manual en la siguiente linea
+        row = row + [vehicle] #A todas la columna vehicle, le agrego el num de vehiculo
         rows.append(row)
     
     # convierte headers + rows en un array de diccionarios
@@ -88,7 +89,8 @@ def createDb(filename):
                 SPEED TEXT,
                 ALTITUD TEXT,
                 EVENT TEXT,
-                ZONE TEXT)''')
+                ZONE TEXT,
+                VEHICLE TEXT)''')
         print "Tabla creada"
         conn.commit()
     except:
@@ -111,7 +113,8 @@ def insertRows(db, rows):
                     '{Speed}',
                     '{Altitude}',
                     '{Event}',
-                    '{Zone}')""".format(**row)
+                    '{Zone}',
+                    '{Vehicle}')""".format(**row)
             cursor.execute(insert_query)
 
         db.commit()
@@ -154,45 +157,51 @@ def downloadXls(opener,fecha_desde,fecha_hasta,vehiculo):
     #print excelResponse.info().getheader('Set-Cookie')
     try: 
         xls = excelResponse.read()
-        with open('data'+vehiculo+'.xls','wb') as f:
+        with open('data.xls','wb') as f:
             f.write(xls)   
     except:
         print "No se pudo leer o generar el archivo."
         #exit()
-def Update(db,opener):
-    vehiculo = raw_input("Ingrese numero de vehiculo: ")
+def Update(db,opener,corredor):
+    #vehiculo = raw_input("Ingrese numero de vehiculo: ")
     cursor = db.cursor()
-    query = "SELECT max(DATE) from data" #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
-    cursor.execute(query)
-    ultima_fecha = cursor.fetchone()
-    if ultima_fecha[0] is not None:
-        fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
-        fecha_desde = fecha_desde - timedelta(hours=3)
-        fecha_desde = fecha_desde + timedelta(seconds=1) #LE SUMO UN SEGUNDO PARA QUE BUSQUE UN SEGUNDO DPS DEL ULTIMO DATO
-        fecha_hasta = fecha_desde + timedelta(hours=1)
-        fecha_desde_unix = mktime(fecha_desde.timetuple())
-        fecha_hasta_unix = mktime(fecha_hasta.timetuple())
-        try:
-            downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
-            rows = parseXls('data'+vehiculo+'.xls')
-            insertRows(db, rows)
-        except:
-            print "No se registraron nuevos datos"
-    else:
-        print "Base de datos vacia"
+    for vehiculo in corredor:
+        query = "SELECT max(DATE) FROM data WHERE VEHICLE='%s'"%(vehiculo) #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
+        cursor.execute(query)
+        ultima_fecha = cursor.fetchone()
+        print vehiculo
+        if ultima_fecha[0] is not None:
+            fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
+            fecha_desde = fecha_desde - timedelta(hours=3)
+            fecha_desde = fecha_desde + timedelta(seconds=1) #LE SUMO UN SEGUNDO PARA QUE BUSQUE UN SEGUNDO DPS DEL ULTIMO DATO
+            fecha_hasta = fecha_desde + timedelta(hours=5)
+            fecha_desde_unix = mktime(fecha_desde.timetuple())
+            fecha_hasta_unix = mktime(fecha_hasta.timetuple())
+            try:
+                downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+                rows = parseXls('data.xls',vehiculo)
+                insertRows(db, rows)
+            except:
+                print "No se registraron nuevos datos"
+        else:
+            print "Base de datos vacia"
     db.close()
         #exit()
 if __name__ == '__main__':
     db = createDb('tabla.sqlite')
     opener = login()
+    corredor =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
+    #Son 79 corredores en total, se puede poner un for de 1 hasta 321 para no armar este vector, pero se demorara mas
     flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     if flag == 's':
-        vehiculo = raw_input("Ingrese numero de vehiculo: ")
+        #vehiculo = raw_input("Ingrese numero de vehiculo: ")
         fecha_desde = FechaDesde()
         fecha_hasta = FechaHasta()
-        downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
-        rows = parseXls('data'+vehiculo+'.xls')
-        insertRows(db, rows)
+        for vehiculo in corredor:
+            print vehiculo
+            downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
+            rows = parseXls('data.xls',vehiculo)
+            insertRows(db, rows)
     else:
-        Update(db,opener)
+        Update(db,opener,corredor)
     db.close()
