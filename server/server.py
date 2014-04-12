@@ -12,7 +12,7 @@ class Database(object):
 		self.cursor = self.connection.cursor()
 
 
-db = Database('../tabla.sqlite')
+db = Database('./tabla.sqlite')
 
 @route('/times/<name>')
 def index(name):

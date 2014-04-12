@@ -1,3 +1,13 @@
+Server Code
+===========
+
+run
+
+	python server/server.py
+
+and open http://localhost:8000/times/ALY
+
+
 Iritrac txt files to xml
 ========================
 
