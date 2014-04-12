@@ -42,7 +42,21 @@ def FechaHasta():
     t = t - timedelta(hours=3) #Convierto a UTC - 3
     timeunix = mktime(t.timetuple())
     return timeunix
-      
+def FechaUpdate():
+    newfecha = []
+    current_date = date.today() #Fecha de hoy
+    current_date=str(current_date) #convierto en string
+    inicial_date = current_date + ' 00:00:00' #Le agrego la hora 00
+    inicial_date = datetime.strptime(inicial_date,'%Y-%m-%d %H:%M:%S') #Convierto formato Fecha
+    timeunix1 = mktime(inicial_date.timetuple()) #convierto formato Unix
+    newfecha.append(timeunix1)
+    
+    fecha =datetime.now().strftime('%Y-%m-%d %H:%M:%S') #Fecha y hora actual
+    fecha = datetime.strptime(fecha,'%Y-%m-%d %H:%M:%S')
+    timeunix2 = mktime(fecha.timetuple())
+    newfecha.append(timeunix2)
+    return newfecha
+    
 def parseXls(filename,vehicle):
 
     doc = xlrd.open_workbook(filename) #abro el .xls
@@ -166,6 +180,7 @@ def Update(db,opener,corredor):
     #vehiculo = raw_input("Ingrese numero de vehiculo: ")
     cursor = db.cursor()
     for vehiculo in corredor:
+        
         query = "SELECT max(DATE) FROM data WHERE VEHICLE='%s'"%(vehiculo) #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
         cursor.execute(query)
         ultima_fecha = cursor.fetchone()
@@ -185,13 +200,23 @@ def Update(db,opener,corredor):
                 print "No se registraron nuevos datos"
         else:
             print "Base de datos vacia"
+            fechas = []
+            fechas=FechaUpdate() #Si no tiene nada en la BD, busca en internet con la fecha de hoy desde las 0 hs hasta la hora actual
+            
+            fecha_desde_unix= fechas[0]
+            fecha_hasta_unix=fechas[1]
+            try:
+                downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+                rows = parseXls('data.xls',vehiculo)
+                insertRows(db, rows)
+            except:
+                print "No se encotro informacion"
     db.close()
         #exit()
 if __name__ == '__main__':
     db = createDb('tabla.sqlite')
     opener = login()
     corredor =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
-    #Son 79 corredores en total, se puede poner un for de 1 hasta 321 para no armar este vector, pero se demorara mas
     flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     if flag == 's':
         #vehiculo = raw_input("Ingrese numero de vehiculo: ")
