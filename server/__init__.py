@@ -16,6 +16,10 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 engine = create_engine(DATABASE_URL, echo=True)
 
+from models import Data
+
+Base.metadata.create_all(engine)
+
 plugin = sqlalchemy.Plugin(
     engine, # SQLAlchemy engine created with create_engine function.
     Base.metadata, # SQLAlchemy metadata, required only if create=True.
