@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 __version__ = '0.1'
 from bottle import Bottle, TEMPLATE_PATH
+from bottle.ext import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+
 app = Bottle()
 
 # TEMPLATE_PATH.append("./server/views/")
@@ -8,10 +12,6 @@ app = Bottle()
 
 DATABASE_URL = 'sqlite:///db.sqlite'
 # DATABASE_URL = 'sqlite:///:memory:'
-
-from bottle.ext import sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 engine = create_engine(DATABASE_URL, echo=True)

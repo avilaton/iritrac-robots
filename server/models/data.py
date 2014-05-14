@@ -12,7 +12,7 @@ class Data(Base):
     alpha = Column(String(50))
     date = Column(String(50))
     lat = Column(String(50))
-    long = Column(String(50))
+    lon = Column(String(50))
     speed = Column(String(50))
     altitud = Column(String(50))
     event = Column(String(50))
