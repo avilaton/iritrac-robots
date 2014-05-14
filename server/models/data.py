@@ -4,7 +4,7 @@
 from sqlalchemy import create_engine, Column, Integer, Sequence, String
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from server import Base
 
 class Data(Base):
     __tablename__ = 'data'
