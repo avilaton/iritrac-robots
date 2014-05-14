@@ -38,5 +38,5 @@ def do_upload():
 	upload.save('uploads') # appends upload.filename automatically
 	return 'OK'
 
-if __name__ == '__main__':
-	run(host='localhost', port=8000, debug=True, reloader=True)
+# if __name__ == '__main__':
+# 	run(host='localhost', port=8000, debug=True, reloader=True)
