@@ -1,56 +1,29 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from server import db
-import sqlite3
+from sqlalchemy import create_engine, Column, Integer, Sequence, String
+from sqlalchemy.ext.declarative import declarative_base
 
-class Data(object):
-  """represents a data row from the iritrack db"""
-  db = db
-  tablename = "data"
+from server import Base
 
-  def __init__(self, dict=None):
-    self.store = {}
-    if dict is not None: self.store.update(dict)
+class Data(Base):
+    __tablename__ = 'data'
+    id = Column(Integer, Sequence('id_seq'), primary_key=True)
+    alpha = Column(String(50))
+    date = Column(String(50))
+    lat = Column(String(50))
+    lon = Column(String(50))
+    speed = Column(String(50))
+    altitud = Column(String(50))
+    event = Column(String(50))
+    zone = Column(String(50))
+    vehicle = Column(String(50))
 
-  def __repr__(self):
-    return self.store.__repr__()
+    def __init__(self, alpha, lat, lon):
+        self.alpha = alpha
+        self.lat = lat
+        self.lon = lon
 
-  @classmethod
-  def getRowsByDriverId(cls, driver_id):
-    cursor = cls.db.cursor()
-    cursor.execute("SELECT * FROM "+cls.tablename+" WHERE Alpha=$1",
-      (driver_id,))
-    return [Data(dict(r)) for r in cursor.fetchall()]
-
-  @classmethod
-  def drop(cls):
-    cursor = cls.db.cursor()
-    try:
-      cursor.execute("DROP TABLE IF EXISTS"+cls.tablename)
-      print "Droped table"
-      cls.db.commit()
-    except sqlite3.IntegrityError:
-      print "Error droping table"
-
-  @classmethod
-  def create(cls):
-    cursor = cls.db.cursor()
-    try:
-      cursor.execute("CREATE TABLE "+cls.tablename+''' (
-        Alpha TEXT,
-        DATE TEXT,
-        LATITUD TEXT,
-        LONG  TEXT,
-        SPEED TEXT,
-        ALTITUD TEXT,
-        EVENT TEXT,
-        ZONE TEXT,
-        VEHICLE TEXT)''')
-      print "Table created"
-      cls.db.commit()
-    except sqlite.IntegrityError:
-      print "Error creating table"
-
-
+    def __repr__(self):
+        return "<Data('%d', lat:'%s', lon:'%s')>" % (self.id, self.lat, self.lon)
 
