@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import create_engine, Column, Integer, Sequence, String
-from sqlalchemy.ext.declarative import declarative_base
-
 from server import Base
 
 class Data(Base):
@@ -26,4 +24,3 @@ class Data(Base):
 
     def __repr__(self):
         return "<Data('%d', lat:'%s', lon:'%s')>" % (self.id, self.lat, self.lon)
-
