@@ -12,15 +12,15 @@ class Data(Base):
     lat = Column(String(50))
     lon = Column(String(50))
     speed = Column(String(50))
-    altitud = Column(String(50))
+    altitude = Column(String(50))
     event = Column(String(50))
     zone = Column(String(50))
     vehicle = Column(String(50))
 
-    def __init__(self, alpha, lat, lon):
-        self.alpha = alpha
+    def __init__(self, date, lat, lon):
+        self.date = date
         self.lat = lat
         self.lon = lon
 
     def __repr__(self):
-        return "<Data('%d', lat:'%s', lon:'%s')>" % (self.id, self.lat, self.lon)
+        return "<Data(lat:'%s', lon:'%s')>" % (self.lat, self.lon)

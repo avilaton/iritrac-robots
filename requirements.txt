@@ -4,3 +4,4 @@ bottle==0.12.7
 bottle-sqlalchemy==0.4.1
 bottle-sqlite==0.1.2
 wsgiref==0.1.2
+xlrd==0.9.3

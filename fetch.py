@@ -11,6 +11,14 @@ import sqlite3
 from time import mktime
 from datetime import *
 
+from server.models import Data
+from server import engine
+from sqlalchemy.orm import sessionmaker
+
+Session = sessionmaker(bind=engine)
+session = Session()
+print session
+
 def FechaDesde():
     dia_desde = raw_input("Dia Desde en ""dd"": ")
     mes_desde = raw_input("Mes Desde en ""MM"": ")
@@ -85,6 +93,7 @@ def parseXls(filename,vehicle):
     # convierte headers + rows en un array de diccionarios
     dictArray = []
     for row in rows:
+        print row
         dictionary = {k:row[j] for j,k in enumerate(headers)}
         dictArray.append(dictionary)
         
@@ -112,29 +121,13 @@ def createDb(filename):
 
     return conn
 
-def insertRows(db, rows):
-    
-    cursor = db.cursor()
-    try:
-        headers = rows[0].keys()
-        print "Almacenando datos....."
-        for row in rows:
-            insert_query = """INSERT INTO data 
-                VALUES ('{Alpha}',
-                    '{Date}',
-                    '{Latitude}',
-                    '{Longitude}',
-                    '{Speed}',
-                    '{Altitude}',
-                    '{Event}',
-                    '{Zone}',
-                    '{Vehicle}')""".format(**row)
-            cursor.execute(insert_query)
-
-        db.commit()
-        print "Datos guardados en BD"
-    except:
-        print "No se encotro informacion"
+def insertRows(rows):
+    headers = rows[0].keys()
+    print headers
+    for r in rows:
+        data = Data(r['Alpha'], r['Latitude'], r['Longitude'])
+        session.add(data)
+    session.commit()
     
 def login():
     COOKIEFILE = 'cookies.lwp'
@@ -213,7 +206,8 @@ def Update(db,opener,corredor):
                 print "No se encotro informacion"
     db.close()
         #exit()
-if __name__ == '__main__':
+
+def roll():
     db = createDb('tabla.sqlite')
     opener = login()
     corredor =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
@@ -226,7 +220,15 @@ if __name__ == '__main__':
             print vehiculo
             downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
             rows = parseXls('data.xls',vehiculo)
-            insertRows(db, rows)
+            insertRows(rows)
     else:
         Update(db,opener,corredor)
     db.close()
+
+def test():
+    rows = parseXls('data.xls',1)
+    insertRows(rows)
+
+if __name__ == '__main__':
+    # roll()
+    test()
