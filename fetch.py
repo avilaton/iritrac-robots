@@ -12,6 +12,7 @@ from time import mktime
 from datetime import *
 
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
 from server import engine
 from server.models import Data
 
@@ -65,10 +66,9 @@ def FechaUpdate():
     newfecha.append(timeunix2)
     return newfecha
     
-def parseXls(filename):
-    doc = xlrd.open_workbook(filename) #abro el .xls
+def parseXls(xlsFileObject):
+    doc = xlrd.open_workbook(file_contents=xlsFileObject) #abro el .xls
     sheet = doc.sheet_by_index(0) #Genera el objeto
-
     
     tipos_datos = {0: 'TEXT',
                  1: 'TEXT',
@@ -121,9 +121,14 @@ def createDb(filename):
 
 def insertRows(rows, vehicle):
     headers = rows[0].keys()
-    print headers
     for r in rows:
-        data = Data(r['Alpha'], r['Latitude'], r['Longitude'])
+        data = Data(date=r['Date'], lat=r['Latitude'], lon=r['Longitude'])
+        data.alpha = r['Alpha']
+        data.speed = r['Speed']
+        data.altitude = r['Altitude']
+        data.event = r['Event']
+        data.zone = r['Zone']
+        data.vehicle = vehicle
         session.add(data)
     session.commit()
     
@@ -162,20 +167,17 @@ def downloadXls(opener,fecha_desde,fecha_hasta,vehiculo):
     #print excelResponse.info().getheader('Set-Cookie')
     try: 
         xls = excelResponse.read()
-        with open('data.xls','wb') as f:
-            f.write(xls)   
     except:
         print "No se pudo leer o generar el archivo."
-        #exit()
-def Update(db,opener,corredor):
-    #vehiculo = raw_input("Ingrese numero de vehiculo: ")
-    cursor = db.cursor()
+    return xls
+
+def Update(opener,corredor):
     for vehiculo in corredor:
-        
-        query = "SELECT max(DATE) FROM data WHERE VEHICLE='%s'"%(vehiculo) #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
-        cursor.execute(query)
-        ultima_fecha = cursor.fetchone()
-        print vehiculo
+        # query = "SELECT max(DATE) FROM data WHERE VEHICLE='%s'"%(vehiculo) #EN ESTE SELECT HAY QUE MODIFICARLO POR "SELECT max(DATE) from data WHERE 
+        # cursor.execute(query)
+        # ultima_fecha = cursor.fetchone()
+        ultima_fecha = session.query(func.max(Data.date)).filter_by(vehicle=vehiculo).first()
+        print vehiculo, ultima_fecha
         if ultima_fecha[0] is not None:
             fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
             fecha_desde = fecha_desde - timedelta(hours=3)
@@ -184,9 +186,9 @@ def Update(db,opener,corredor):
             fecha_desde_unix = mktime(fecha_desde.timetuple())
             fecha_hasta_unix = mktime(fecha_hasta.timetuple())
             try:
-                downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
-                rows = parseXls('data.xls',vehiculo)
-                insertRows(db, rows)
+                xlsFileObject = downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+                rows = parseXls(xlsFileObject)
+                insertRows(rows, vehiculo)
             except:
                 print "No se registraron nuevos datos"
         else:
@@ -197,36 +199,47 @@ def Update(db,opener,corredor):
             fecha_desde_unix= fechas[0]
             fecha_hasta_unix=fechas[1]
             try:
-                downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
-                rows = parseXls('data.xls',vehiculo)
-                insertRows(db, rows)
+                xlsFileObject = downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+                rows = parseXls(xlsFileObject)
+                insertRows(rows, vehiculo)
             except:
                 print "No se encotro informacion"
-    db.close()
-        #exit()
 
 def roll():
-    # db = createDb('tabla.sqlite')
     opener = login()
-    corredor =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
+    drivers =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
     flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     if flag == 's':
         #vehiculo = raw_input("Ingrese numero de vehiculo: ")
         fecha_desde = FechaDesde()
         fecha_hasta = FechaHasta()
-        for vehiculo in corredor:
+        for vehiculo in drivers:
             print vehiculo
-            downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
-            rows = parseXls('data.xls')
+            xls = downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
+            rows = parseXls(xls)
             insertRows(rows, vehiculo)
     else:
-        Update(db,opener,corredor)
-    # db.close()
+        Update(opener,drivers)
 
-def test():
-    rows = parseXls('data.xls')
-    insertRows(rows, 1)
+def test_parsing():
+    vehiculo = 1
+    fecha_desde = 1388534400.0 # FechaDesde()
+    fecha_hasta = 1400198400.0 # FechaHasta()
+    connection = login()
+    xlsFileObject = downloadXls(connection, fecha_desde, fecha_hasta, vehiculo)
+    rows = parseXls(xlsFileObject)
+    insertRows(rows, vehiculo)
+
+def test_query():
+    result = session.query(func.max(Data.date)).filter_by(alpha='ALY')
+    print result.first()[0]
+
+def test_update():
+    connection = login()
+    Update(connection, [1])
 
 if __name__ == '__main__':
-    roll()
-    # test()
+    # roll()
+    test_parsing()
+    # test_query()
+    test_update()

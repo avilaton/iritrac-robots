@@ -17,10 +17,10 @@ class Data(Base):
     zone = Column(String(50))
     vehicle = Column(String(50))
 
-    def __init__(self, date, lat, lon):
+    def __init__(self, date=None, lat=None, lon=None):
         self.date = date
         self.lat = lat
         self.lon = lon
 
     def __repr__(self):
-        return "<Data(lat:'%s', lon:'%s')>" % (self.lat, self.lon)
+        return "<Data alpha: '%s' (lat:'%s', lon:'%s')>" % (self.alpha, self.lat, self.lon)
