@@ -11,13 +11,12 @@ import sqlite3
 from time import mktime
 from datetime import *
 
-from server.models import Data
-from server import engine
 from sqlalchemy.orm import sessionmaker
+from server import engine
+from server.models import Data
 
 Session = sessionmaker(bind=engine)
 session = Session()
-print session
 
 def FechaDesde():
     dia_desde = raw_input("Dia Desde en ""dd"": ")
@@ -50,6 +49,7 @@ def FechaHasta():
     t = t - timedelta(hours=3) #Convierto a UTC - 3
     timeunix = mktime(t.timetuple())
     return timeunix
+
 def FechaUpdate():
     newfecha = []
     current_date = date.today() #Fecha de hoy
@@ -65,8 +65,7 @@ def FechaUpdate():
     newfecha.append(timeunix2)
     return newfecha
     
-def parseXls(filename,vehicle):
-
+def parseXls(filename):
     doc = xlrd.open_workbook(filename) #abro el .xls
     sheet = doc.sheet_by_index(0) #Genera el objeto
 
@@ -82,18 +81,17 @@ def parseXls(filename,vehicle):
     for i in range(sheet.ncols):
         name = sheet.cell_value(0,i)
         headers.append(str(name.split(' ')[0]))
-    headers.append('Vehicle') # Le agrego el header Vehicle, agrego una columna
+
     # extrae todas las filas
     rows = []
     for i in range(sheet.nrows-1):
         row = [sheet.cell_value(i+1,j) for j in range(8)] #El antes estaba len(header). El len header total es de 9, pero agrego 8 + 1 manual en la siguiente linea
-        row = row + [vehicle] #A todas la columna vehicle, le agrego el num de vehiculo
+        row = row
         rows.append(row)
     
     # convierte headers + rows en un array de diccionarios
     dictArray = []
     for row in rows:
-        print row
         dictionary = {k:row[j] for j,k in enumerate(headers)}
         dictArray.append(dictionary)
         
@@ -121,7 +119,7 @@ def createDb(filename):
 
     return conn
 
-def insertRows(rows):
+def insertRows(rows, vehicle):
     headers = rows[0].keys()
     print headers
     for r in rows:
@@ -208,7 +206,7 @@ def Update(db,opener,corredor):
         #exit()
 
 def roll():
-    db = createDb('tabla.sqlite')
+    # db = createDb('tabla.sqlite')
     opener = login()
     corredor =[1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
     flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
@@ -219,16 +217,16 @@ def roll():
         for vehiculo in corredor:
             print vehiculo
             downloadXls(opener,fecha_desde,fecha_hasta,vehiculo)
-            rows = parseXls('data.xls',vehiculo)
-            insertRows(rows)
+            rows = parseXls('data.xls')
+            insertRows(rows, vehiculo)
     else:
         Update(db,opener,corredor)
-    db.close()
+    # db.close()
 
 def test():
-    rows = parseXls('data.xls',1)
-    insertRows(rows)
+    rows = parseXls('data.xls')
+    insertRows(rows, 1)
 
 if __name__ == '__main__':
-    # roll()
-    test()
+    roll()
+    # test()
