@@ -1,4 +1,4 @@
-<h1>Vehicle {{alpha}} times</h1>
+<h1>Vehicle {{driver_id}} data</h1>
 <table>
 	<thead>
 		<tr>
@@ -7,10 +7,10 @@
 		</tr>
 	</thead>
 <tbody>
-	% for item in lista:
+	% for item in data:
 	<tr>
-	    <td>{{item['Alpha']}}</td>
-	    <td>{{item['DATE']}}</td>
+	    <td>{{item.id}}</td>
+	    <td>{{item.alpha}}</td>
 	</tr>
 	% end
 </tbody>

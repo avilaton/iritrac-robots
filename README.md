@@ -1,11 +1,28 @@
+Installation
+============
+
+Create a virtual environment 
+
+```python
+mkdir venv
+virtualenv venv
+```
+
+Activate it using `source ./venv/bin/activate`. To install dependencies, 
+use
+
+```
+pip install -r requirements.txt
+```
+
 Server Code
 ===========
 
 run
 
-	python server/server.py
+	python runserver.py
 
-and open http://localhost:8000/times/ALY
+and open http://localhost:8000/reports/driver_id .
 
 
 Iritrac txt files to xml
