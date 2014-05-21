@@ -191,12 +191,24 @@ def updateAll():
         updateDriver(connection, driver.driver_id)
 
 def createDrivers():
-    drivers = [1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,
-        27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,
-        105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,
-        126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
-    for driver_id in drivers:
-        driver = Driver(id=driver_id, driver_id=driver_id, name="unknown")
+    #drivers = [1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,
+        #27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,
+        #105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,
+        #126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
+    doc = xlrd.open_workbook("largada.xls") #abro el .xls
+    sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
+
+    ncols = sheet.ncols
+    nrows = sheet.nrows
+
+    for i in range(nrows):
+        id_corr = sheet.cell(i,0)
+        group = sheet.cell (i,1)
+        name = sheet.cell (i,2)
+        country = sheet.cell (i,3)
+        time = sheet.cell (i,4) #Hay que corregir este tiempo
+        #print id_corr.value, " ", group.value, " ", name.value," ", country.value, " ", time.value
+        driver = Driver(id=int(id_corr.value), driver_id=int(group.value), name=name.value)
         session.merge(driver)
     session.commit()
 
@@ -211,18 +223,14 @@ def test_parsing():
 
 def test_query():
     connection = login()
-    xls = downloadXls(connection, 1363910400, 1395532799, 1363910400, 1395532799, '603')
+    xls = downloadXls(connection, 1363910400, 1395532799, '603')
     print xls
-
-def tests():
-    # test_parsing()
-    # test_query()
-    # updateAll()
-    
 if __name__ == '__main__':
-    # createDrivers()
-    flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
-    if flag == 's':
-        firstFetch()
-    else:
-        updateAll()
+    #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
+    #if flag == 's':
+        #firstFetch()
+    #else:
+        #updateAll()
+    createDrivers()    
+    #test_parsing()
+    #test_query()
