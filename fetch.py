@@ -16,7 +16,7 @@ from sqlalchemy.sql import func
 from server import engine
 from server.models import Data
 from server.models import Driver
-
+from server.models import StartTime
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -206,12 +206,44 @@ def createDrivers():
         group = sheet.cell (i,1)
         name = sheet.cell (i,2)
         country = sheet.cell (i,3)
-        time = sheet.cell (i,4) #Hay que corregir este tiempo
-        #print id_corr.value, " ", group.value, " ", name.value," ", country.value, " ", time.value
+        timecell = sheet.cell (i,4)
+        #print id_corr.value, " ", grupo.value, " ", nombre.value," ", pais.value, " ", tiempo.value
         driver = Driver(id=int(id_corr.value), driver_id=int(group.value), name=name.value)
         session.merge(driver)
     session.commit()
 
+def time_of_drivers():
+    doc = xlrd.open_workbook("largada.xls") #abro el .xls
+    sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
+
+    ncols = sheet.ncols
+    nrows = sheet.nrows
+
+    book_datemode = doc.datemode
+    timetmp = time(0,0,0) #Tiempo temporal, es para hacer la comparacion
+    for i in range(nrows):
+        id_corr = sheet.cell(i,0)
+        group = sheet.cell (i,1)
+        name = sheet.cell (i,2)
+        timecell = sheet.cell (i,4)
+
+        year, month, day, hour, minute, second = xlrd.xldate_as_tuple(timecell.value, book_datemode) #separo la fecha de la celda del excel
+        
+        #timedr = time(hour, minute, second) 
+        timedr = timedelta(hours=hour,minutes=minute,seconds=second)
+        
+        if timedr == timetmp:
+            #timedr = timedr + timedelta(seconds=30) no se xq no funciona, asi que hice la chanchada de abajo
+            timedr = timedelta(hours=hour,minutes=minute,seconds=30) #si hay dos tiempos iguales, sumo 30 seg al segundo
+        
+        timerun = StartTime(id = int(id_corr.value),name=name.value,start_time= str(timedr))
+        timetmp = timedr #Actualizo el temportal
+        try:
+            session.add(timerun) #si no existe lo agrega
+        except:
+            session.merge(timerun) #si salta error es porque existe, entonces le hace un merge
+
+    session.commit()
 def test_parsing():
     vehiculo = 1
     fecha_desde = 1388534400.0 # FechaDesde()
@@ -228,9 +260,10 @@ def test_query():
 if __name__ == '__main__':
     #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     #if flag == 's':
-        #firstFetch()
+    #firstFetch()
     #else:
         #updateAll()
     createDrivers()    
+    time_of_drivers()
     #test_parsing()
     #test_query()
