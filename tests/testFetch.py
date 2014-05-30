@@ -11,12 +11,13 @@ from server import Base
 DATABASE_URL = 'sqlite:///:memory:'
 
 engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
 
 from server.models import *
 
 Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
+print dir(session)
 
 def setup():
     session.configure(bind=engine)
@@ -24,7 +25,7 @@ def setup():
     # load some test data, do so here.
 
     # To create tables, you typically do:
-    model.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
 def teardown():
     session.remove()
