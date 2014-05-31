@@ -16,7 +16,9 @@ from sqlalchemy.sql import func
 from server import engine
 from server.models import Data
 from server.models import Driver
+from server.services import xlsParser
 from server.models import StartTime
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -68,45 +70,19 @@ def FechaUpdate():
     return newfecha
     
 def parseXls(xlsFileObject):
-    doc = xlrd.open_workbook(file_contents=xlsFileObject) #abro el .xls
-    sheet = doc.sheet_by_index(0) #Genera el objeto
-    
-    tipos_datos = {0: 'TEXT',
-                 1: 'TEXT',
-                 2: 'REAL',
-                 3: 'REAL',
-                 4: 'INTEGER',
-                }
-   
-    headers = []
-    for i in range(sheet.ncols):
-        name = sheet.cell_value(0,i)
-        headers.append(str(name.split(' ')[0]))
-
-    # extrae todas las filas
-    rows = []
-    for i in range(sheet.nrows-1):
-        row = [sheet.cell_value(i+1,j) for j in range(8)] #El antes estaba len(header). El len header total es de 9, pero agrego 8 + 1 manual en la siguiente linea
-        row = row
-        rows.append(row)
-    
-    # convierte headers + rows en un array de diccionarios
-    dictArray = []
-    for row in rows:
-        dictionary = {k:row[j] for j,k in enumerate(headers)}
-        dictArray.append(dictionary)
-        
-    return dictArray
+    headers = ['alpha', 'date', 'lat', 'lon', 'speed', 'altitude', 'event', 'zone']
+    rows = xlsParser(xlsFileObject, headers=headers).toDictArray()
+    return rows
 
 def insertRows(rows, vehicle):
     headers = rows[0].keys()
     for r in rows:
-        data = Data(date=r['Date'], lat=r['Latitude'], lon=r['Longitude'])
-        data.alpha = r['Alpha']
-        data.speed = r['Speed']
-        data.altitude = r['Altitude']
-        data.event = r['Event']
-        data.zone = r['Zone']
+        data = Data(date=r['date'], lat=r['lat'], lon=r['lon'])
+        data.alpha = r['alpha']
+        data.speed = r['speed']
+        data.altitude = r['altitude']
+        data.event = r['event']
+        data.zone = r['zone']
         data.vehicle = vehicle
         session.add(data)
     session.commit()
@@ -195,7 +171,7 @@ def createDrivers():
         #27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,
         #105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,
         #126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
-    doc = xlrd.open_workbook("largada.xls") #abro el .xls
+    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
@@ -213,7 +189,7 @@ def createDrivers():
     session.commit()
 
 def time_of_drivers():
-    doc = xlrd.open_workbook("largada.xls") #abro el .xls
+    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
@@ -250,7 +226,8 @@ def test_parsing():
     fecha_hasta = 1400198400.0 # FechaHasta()
     connection = login()
     xlsFileObject = downloadXls(connection, fecha_desde, fecha_hasta, vehiculo)
-    rows = parseXls(xlsFileObject)
+    headers = ['alpha', 'date', 'lat', 'lon', 'speed', 'altitude', 'event', 'zone']
+    rows = xlsParser(xlsFileObject, headers=headers).toDictArray()
     insertRows(rows, vehiculo)
 
 def test_query():

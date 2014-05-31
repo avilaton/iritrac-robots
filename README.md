@@ -7,7 +7,7 @@ Create a virtual environment
 mkdir venv
 virtualenv venv
 ```
-
+ 
 Activate it using `source ./venv/bin/activate`. To install dependencies, 
 use
 
