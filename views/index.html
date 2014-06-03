@@ -2,10 +2,11 @@
 <head>
 </head>
 <body>
-	<h2>Upload drivers</h2>
-	<form enctype="multipart/form-data" action="/data" method="post">
-		<p>File: <input type="file" name="drivers"></p>
-		<p><input type="submit" value="Upload"></p>
+	<h1>Actualizar base</h1>
+	<form method='post' action="/">
+			<input type="text" placeholder="YYYY-MM-DD" name="from">
+			<input type="text" placeholder="YYYY-MM-DD" name="to">
+			<button type="submit">Actualizar</button>
 	</form>
 </body>
 </html>
