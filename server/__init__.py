@@ -10,12 +10,15 @@ app = Bottle()
 # TEMPLATE_PATH.append("./server/views/")
 # TEMPLATE_PATH.remove("./views/")
 
+IRITRACK_USER = 'ruta2'
+IRITRACK_PASS = 'DESAFIO'
+
 DATABASE_URL = 'sqlite:///db.sqlite'
 # DATABASE_URL = 'sqlite:///:memory:'
 
 Base = declarative_base()
-engine = create_engine(DATABASE_URL)
-# engine = create_engine(DATABASE_URL, echo=True)
+# engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 
 from models import Data
 
@@ -33,3 +36,5 @@ plugin = sqlalchemy.Plugin(
 app.install(plugin)
 
 from controllers import *
+
+from worker import sched

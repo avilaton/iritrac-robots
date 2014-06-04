@@ -17,6 +17,7 @@ from server import engine
 from server.models import Data
 from server.models import Driver
 from server.services import xlsParser
+from server.services import Iritrack
 from server.models import StartTime
 
 Session = sessionmaker(bind=engine)
@@ -220,6 +221,7 @@ def time_of_drivers():
             session.merge(timerun) #si salta error es porque existe, entonces le hace un merge
 
     session.commit()
+
 def test_parsing():
     vehiculo = 1
     fecha_desde = 1388534400.0 # FechaDesde()
@@ -231,9 +233,12 @@ def test_parsing():
     insertRows(rows, vehiculo)
 
 def test_query():
-    connection = login()
-    xls = downloadXls(connection, 1363910400, 1395532799, '603')
+    iri = Iritrack()
+    iri.login('ruta2', 'DESAFIO')
+
+    xls = iri.getData(1363910400, 1395532799, '4')
     print xls
+
 if __name__ == '__main__':
     #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     #if flag == 's':
