@@ -18,20 +18,21 @@ from server.models import Data
 from server.models import Driver
 from server.services import xlsParser
 from server.models import StartTime
-
+from server.models import Stage
 Session = sessionmaker(bind=engine)
 session = Session()
 
 def FechaDesde():
-    dia_desde = raw_input("Dia Desde en ""dd"": ")
-    mes_desde = raw_input("Mes Desde en ""MM"": ")
-    ano_desde = raw_input("Ano Desde en ""YYYY"": ")
-    hora_desde = raw_input("Hora Desde en ""HH"": ")
-    minuto_desde = raw_input("Minuto Desde en ""mm"": ")
-    #dia_inicial='05'
-    #mes_inicial='04'
-    #ano_inicial='2014'
-    #minuto_inicial='00'
+    #dia_desde = raw_input("Dia Desde en ""dd"": ")
+    #mes_desde = raw_input("Mes Desde en ""MM"": ")
+    #ano_desde = raw_input("Ano Desde en ""YYYY"": ")
+    #hora_desde = raw_input("Hora Desde en ""HH"": ")
+    #minuto_desde = raw_input("Minuto Desde en ""mm"": ")
+    dia_desde='06'
+    mes_desde='06'
+    ano_desde='2014'
+    hora_desde = '00'
+    minuto_desde='00'
     fecha_desde = dia_desde + '/' + mes_desde + '/' + ano_desde + " " + hora_desde + ':' + minuto_desde
     t = datetime.strptime(fecha_desde, '%d/%m/%Y %H:%M')
     t = t - timedelta(hours=3) #Convierto a UTC - 3
@@ -39,15 +40,16 @@ def FechaDesde():
     return timeunix
 
 def FechaHasta():
-    dia_hasta = raw_input("Dia Hasta en ""dd"": ")
-    mes_hasta = raw_input("Mes Hasta en ""MM"": ")
-    ano_hasta = raw_input("Ano Hasta en ""YYYY"": ")
-    hora_hasta = raw_input("Hora Hasta en ""HH"": ")
-    minuto_hasta = raw_input("Minuto Hasta ""mm"": ")
-    #dia_final='05'
-    #mes_final='04'
-    #ano_final='2014'
-    #minuto_final='00'
+    #dia_hasta = raw_input("Dia Hasta en ""dd"": ")
+    #mes_hasta = raw_input("Mes Hasta en ""MM"": ")
+    #ano_hasta = raw_input("Ano Hasta en ""YYYY"": ")
+    #hora_hasta = raw_input("Hora Hasta en ""HH"": ")
+    #minuto_hasta = raw_input("Minuto Hasta ""mm"": ")
+    dia_hasta='06'
+    mes_hasta='06'
+    ano_hasta='2014'
+    hora_hasta = '23'
+    minuto_hasta='23'
     fecha_hasta = dia_hasta+ '/' + mes_hasta + '/' + ano_hasta + " " + hora_hasta + ':' + minuto_hasta
     t = datetime.strptime(fecha_hasta, '%d/%m/%Y %H:%M')
     t = t - timedelta(hours=3) #Convierto a UTC - 3
@@ -75,7 +77,8 @@ def parseXls(xlsFileObject):
     return rows
 
 def insertRows(rows, vehicle):
-    headers = rows[0].keys()
+   
+    #headers = rows[0].keys()
     for r in rows:
         data = Data(date=r['date'], lat=r['lat'], lon=r['lon'])
         data.alpha = r['alpha']
@@ -157,9 +160,14 @@ def firstFetch():
     fecha_desde = FechaDesde()
     fecha_hasta = FechaHasta()
     for driver in session.query(Driver).all():
-        xls = downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_id)
-        rows = parseXls(xls)
-        insertRows(rows, driver.driver_id)
+        try:
+            print "Corredor: ",driver.driver_id
+            xls = downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_id)
+            rows = parseXls(xls)
+            insertRows(rows, driver.driver_id)
+        except:
+            print "Corredor: ",driver.driver_id, "no esta en la pagina"
+        
 
 def updateAll():
     connection = login()
@@ -171,25 +179,44 @@ def createDrivers():
         #27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,
         #105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,
         #126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
-    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
+    doc = xlrd.open_workbook("largada1.xls") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
     nrows = sheet.nrows
-
+    
     for i in range(nrows):
-        id_corr = sheet.cell(i,0)
+        
         group = sheet.cell (i,1)
         name = sheet.cell (i,2)
-        country = sheet.cell (i,3)
-        timecell = sheet.cell (i,4)
+        
         #print id_corr.value, " ", grupo.value, " ", nombre.value," ", pais.value, " ", tiempo.value
-        driver = Driver(id=int(id_corr.value), driver_id=int(group.value), name=name.value)
-        session.merge(driver)
+        driver = Driver(id=i, driver_id=int(group.value), name=name.value)
+        try:
+            session.add(driver)
+        except:    
+            session.merge(driver)
     session.commit()
-
+def create_stage():
+    zone_name_1 = ["k30","k54","K112","CP1","DZ186","K230","ASS1"]#vector que luego se cargaria desde un excel
+    zone_name_2 = ["DZ35","K64","K104","K123","ASS2"]
+    zone_name_prueba = ["BIVLC","K96"]
+    #for j in range(len(zone_name_1)):
+        #stage = Stage(id=j+1,stage_id=1,zone=zone_name_1[j])
+        #session.add(stage)
+    #session.commit()
+    #i = 0
+    #for j in range(len(zone_name_2)):
+        #stage = Stage(id=(j+len(zone_name_1)+1),stage_id=2,zone=zone_name_2[i])
+        #session.add(stage)
+        #i += 1
+    #session.commit()
+    for j in range(len(zone_name_1)):
+        stage = Stage(id=j+1,stage_id=1,zone=zone_name_1[j])
+        session.add(stage)
+    session.commit()
 def time_of_drivers():
-    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
+    doc = xlrd.open_workbook("largada1.xls") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
@@ -198,10 +225,10 @@ def time_of_drivers():
     book_datemode = doc.datemode
     timetmp = time(0,0,0) #Tiempo temporal, es para hacer la comparacion
     for i in range(nrows):
-        id_corr = sheet.cell(i,0)
+        
         group = sheet.cell (i,1)
         name = sheet.cell (i,2)
-        timecell = sheet.cell (i,4)
+        timecell = sheet.cell (i,3)
 
         year, month, day, hour, minute, second = xlrd.xldate_as_tuple(timecell.value, book_datemode) #separo la fecha de la celda del excel
         
@@ -212,7 +239,7 @@ def time_of_drivers():
             #timedr = timedr + timedelta(seconds=30) no se xq no funciona, asi que hice la chanchada de abajo
             timedr = timedelta(hours=hour,minutes=minute,seconds=30) #si hay dos tiempos iguales, sumo 30 seg al segundo
         
-        timerun = StartTime(id = int(id_corr.value),name=name.value,start_time= str(timedr))
+        timerun = StartTime(id = i,driver_group=int(group.value), name=name.value,start_time= str(timedr))
         timetmp = timedr #Actualizo el temportal
         try:
             session.add(timerun) #si no existe lo agrega
@@ -234,13 +261,79 @@ def test_query():
     connection = login()
     xls = downloadXls(connection, 1363910400, 1395532799, '603')
     print xls
+
+def time_stage_zone():
+    db = session
+    print "Entre"
+    driver=db.query(Driver.driver_id).all() #Busco todos los driver_id que se generaron por el excel largadas.xls
+    zone = db.query(Stage.zone).filter(Stage.stage_id=="1").all() #cambiar el stage_id cuando cambie de etapa
+    #alpha = db.query(Data.alpha).distinct().filter(Data.vehicle==Driver.driver_id).all()
+    alpha = db.query(Data.alpha).distinct().all()
+    
+    vector_driver = []
+    vector_zone = []
+    vector_alpha = []
+    vector_time = []
+    
+    
+    myArray = []
+    for i in range (len(alpha)) :
+        alph=str(alpha[i]).split("'")
+        vector_alpha.append(alph[1]) #Guardo en un vector todos los alpha
+
+    for i in range (len(driver)) : 
+        dri=str(driver[i]).split("'")
+        vector_driver.append(dri[1])#Guardo en un vector todos los drivers
+
+    for i in range(len(zone)):    
+        Stagezone = str(zone[i]).split("'")
+        vector_zone.append(Stagezone[1])
+    #con esto logre tener en vectores los alpha,drivers y las zonas dependiendo de la etapa    
+    print vector_alpha, " ", vector_driver, " ", vector_zone
+    for i in range (len(vector_driver)):
+        #Agarra un alpha y pregunta por todas las zonas, sig alpha y pregunta de vuelta por todas las zonas
+        vehicle_num = vector_driver[i]
+        start_time = db.query(StartTime.start_time).filter(StartTime.driver_group == vector_driver[i]).all() #busco el start time del alpha indicado
+        start_time = str(start_time).split("'")
+        start_time_tmp = datetime.strptime(start_time[1], '%H:%M:%S') #Convierto en datetime para poder restar dsp
+        vector_time.append(start_time[1])
+        vector_result = []
+        vector_dateperzone = []
+        for j in range (len(vector_zone)):
+            
+                zone_name = vector_zone[j]
+                date_per_zone = db.query(Data.date).filter(Data.vehicle==vehicle_num, Data.zone==zone_name).first() #Busco la hora por la que paso en la zona, si no esta, salta un except
+                
+                if date_per_zone == None: #Si me da none es porque no paso por esa zona
+                    vector_result.append('Unknow')
+                    vector_dateperzone.append('Unknow')
+                else:
+                    date_per_zone=str(date_per_zone[0]).split("'")
+                    date_per_zone = datetime.strptime(date_per_zone[0], '%Y-%m-%d %H:%M:%S')
+                    date_zone = str(date_per_zone.hour) + ":" + str(date_per_zone.minute) + ":" + str(date_per_zone.second)  
+                    vector_dateperzone.append(date_zone)
+                    result = date_per_zone - start_time_tmp
+                    result =  str(result).split(",")
+                    vector_result.append(result[1])
+        #myArray.append({'alpha':alpha_name,'startt':start_time[1],'timeK30':vector_dateperzone[0],'K30':vector_result[0],'timeK54':vector_dateperzone[1],'K54':vector_result[1],'timeK112':vector_dateperzone[2],'K112':vector_result[2],'timeCP1':vector_dateperzone[3],'CP1':vector_result[3],'timeDZ186':vector_dateperzone[4],'DZ186':vector_result[4],'timeK230':vector_dateperzone[5],'K230':vector_result[5],'timeASS1':vector_dateperzone[6],'ASS1':vector_result[6]})        
+        print "Vehicle:",vehicle_num,"; Start Time:", start_time[1], ";Time Arrive K30:",vector_result[0] ,"; Result K30:",vector_result[0], "; Time Arrive K54:",vector_dateperzone[1],"; Result K54:",vector_result[1], ";Time Arrive K112:",vector_result[2] ,"; Result K112:",vector_result[2], ";Time Arrive CP1:",vector_result[3] ,"; Result CP1:",vector_result[3], ";Time Arrive DZ186:",vector_result[4] ,"; Result DZ186:",vector_result[4], ";Time Arrive K230:",vector_result[5] ,"; Result K230:",vector_result[5], ";Time Arrive ASS1:",vector_result[6] ,"; Result ASS1:",vector_result[6]
+        #myArray.append({'alpha':alpha_name,'startt':start_time[1],'timeBIVLC':vector_dateperzone[0],'BIVLC':vector_result[0],'timeK96':vector_dateperzone[1],'K96':vector_result[1]})
+        #print "Vehicle:",vehicle_num,"; Start Time:", start_time[1], "; Time Arrive BIVLC:",vector_dateperzone[0],"; Result BIVLC:",vector_result[0], ";Time Arrive K96:",vector_result[1] 
 if __name__ == '__main__':
     #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     #if flag == 's':
     #firstFetch()
     #else:
         #updateAll()
-    createDrivers()    
-    time_of_drivers()
+    print "Creando drivers"
+    #createDrivers()    
+    print "Fin. Creando StartTime"
+    #time_of_drivers()
+    print "Fin. Creando Stage"
+    #create_stage()
+    print "Fin. First firstFetch"
+    #firstFetch()
     #test_parsing()
     #test_query()
+    print "Fin. Creoando Stage"
+    time_stage_zone()
