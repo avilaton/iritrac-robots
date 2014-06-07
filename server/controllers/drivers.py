@@ -1,9 +1,6 @@
-import os
 from bottle import template, request, redirect
 from server import app
-from server.models import Data
 from server.models import Driver
-from server.services import xlsParser
 
 @app.route('/drivers')
 def index(db):

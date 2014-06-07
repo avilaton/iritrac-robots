@@ -38,12 +38,12 @@ app.install(plugin)
 from controllers import *
 
 
-from worker import updateDrivers
+# from worker import updateDrivers
 
-updateDrivers()
+# updateDrivers()
 
-from apscheduler.scheduler import Scheduler
 import atexit
+from apscheduler.scheduler import Scheduler
 
 sched = Scheduler(daemon=True)
 # sched = Scheduler()
