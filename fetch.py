@@ -17,6 +17,7 @@ from server import engine
 from server.models import Data
 from server.models import Driver
 from server.services import xlsParser
+from server.services import Iritrack
 from server.models import StartTime
 from server.models import Stage
 Session = sessionmaker(bind=engine)
@@ -247,6 +248,7 @@ def time_of_drivers():
             session.merge(timerun) #si salta error es porque existe, entonces le hace un merge
 
     session.commit()
+
 def test_parsing():
     vehiculo = 1
     fecha_desde = 1388534400.0 # FechaDesde()
@@ -258,8 +260,10 @@ def test_parsing():
     insertRows(rows, vehiculo)
 
 def test_query():
-    connection = login()
-    xls = downloadXls(connection, 1363910400, 1395532799, '603')
+    iri = Iritrack()
+    iri.login('ruta2', 'DESAFIO')
+
+    xls = iri.getData(1363910400, 1395532799, '4')
     print xls
 
 def time_stage_zone():
@@ -319,6 +323,7 @@ def time_stage_zone():
         print "Vehicle:",vehicle_num,"; Start Time:", start_time[1], ";Time Arrive K30:",vector_result[0] ,"; Result K30:",vector_result[0], "; Time Arrive K54:",vector_dateperzone[1],"; Result K54:",vector_result[1], ";Time Arrive K112:",vector_result[2] ,"; Result K112:",vector_result[2], ";Time Arrive CP1:",vector_result[3] ,"; Result CP1:",vector_result[3], ";Time Arrive DZ186:",vector_result[4] ,"; Result DZ186:",vector_result[4], ";Time Arrive K230:",vector_result[5] ,"; Result K230:",vector_result[5], ";Time Arrive ASS1:",vector_result[6] ,"; Result ASS1:",vector_result[6]
         #myArray.append({'alpha':alpha_name,'startt':start_time[1],'timeBIVLC':vector_dateperzone[0],'BIVLC':vector_result[0],'timeK96':vector_dateperzone[1],'K96':vector_result[1]})
         #print "Vehicle:",vehicle_num,"; Start Time:", start_time[1], "; Time Arrive BIVLC:",vector_dateperzone[0],"; Result BIVLC:",vector_result[0], ";Time Arrive K96:",vector_result[1] 
+
 if __name__ == '__main__':
     #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
     #if flag == 's':
