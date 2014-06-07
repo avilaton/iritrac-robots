@@ -37,4 +37,16 @@ app.install(plugin)
 
 from controllers import *
 
-from worker import sched
+
+from worker import updateDrivers
+
+updateDrivers()
+
+from apscheduler.scheduler import Scheduler
+import atexit
+
+sched = Scheduler(daemon=True)
+# sched = Scheduler()
+# 	atexit.register(lambda: sched.shutdown(wait=False))
+
+# sched.add_interval_job(updateDrivers, seconds=5)

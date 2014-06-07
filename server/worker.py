@@ -1,7 +1,3 @@
-import sys
-import atexit
-from time import sleep
-from apscheduler.scheduler import Scheduler
 from server import engine
 from sqlalchemy.orm import sessionmaker
 
@@ -12,21 +8,13 @@ from server.services import xlsParser
 
 Session = sessionmaker(bind=engine)
 
-
-sched = Scheduler(daemon=True)
-# sched = Scheduler()
-atexit.register(lambda: sched.shutdown(wait=False))
-
 iri = Iritrack()
 iri.login('ruta2', 'DESAFIO')
 
 headers = ['alpha', 'date', 'lat', 'lon', 'speed', 'altitude', 'event', 'zone']
 
-@sched.interval_schedule(seconds=30)
 def updateDrivers():
-	# for driver in session.query(Driver).all():
-	#     updateDriver(connection, driver.driver_id)
-	vehicle = '4'
+	vehicle = 'ACY'
 	xlsFileObject = iri.getData(1388793600, 1401926399, vehicle)
 	rows = xlsParser(xlsFileObject, headers=headers).toDictArray()
 	db = Session()
@@ -40,9 +28,7 @@ def updateDrivers():
 		data.vehicle = vehicle
 		db.add(data)
 	db.close()
-	# results = db.query(Driver).all()
-	# for r in results:
-	# 	print r
-	# db.close()
 
+if __name__ == '__main__':
+	updateDrivers()
 # sched.start()

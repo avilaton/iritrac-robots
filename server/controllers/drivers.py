@@ -1,20 +1,18 @@
 import os
-from bottle import template, request
+from bottle import template, request, redirect
 from server import app
 from server.models import Data
+from server.models import Driver
 from server.services import xlsParser
 
-@app.route('/data/<driver_id>')
-def index(driver_id):
-  rows = Data.getRowsByDriverId(driver_id)
-  return template('data.tpl', alpha=driver_id, lista=rows)
+@app.route('/drivers')
+def index(db):
+	rows = db.query(Driver).all()
+	return template('drivers.html', drivers=rows)
 
-@app.route('/data', method='POST')
-def do_upload():
-  upload = request.files.get('drivers')
-  name, ext = os.path.splitext(upload.filename)
-  # if ext not in ('.png','.jpg','.jpeg'):
-  #   return 'File extension not allowed.'
-  
-  dictArray = xlsParser(upload.file.read()).toDictArray()
-  return 'OK'
+@app.route('/drivers', method='POST')
+def add_driver(db):
+	name = request.forms.get('name')
+	driver_id = request.forms.get('driver_id')
+	db.add(Driver(driver_id=driver_id, name=name))
+	redirect('/drivers')
