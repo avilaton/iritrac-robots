@@ -7,6 +7,7 @@ from server import Base
 class StartTime(Base):
     __tablename__ = 'starttime'
     id = Column(Integer, Sequence('id_seq'), primary_key=True)
+    driver_group= Column(Integer,Sequence('id_seq'))
     name = Column(String(50))
     start_time = Column(String(50))
 
