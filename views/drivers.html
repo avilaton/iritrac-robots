@@ -1,9 +1,12 @@
 <html>
 <head>
 	<style>
-		table, th, tr, td {
-			border: 1px solid #ccc;
-		}
+	table{
+		border-collapse: collapse;
+	}
+	table, th, tr, td {
+		border: 1px solid #ccc;
+	}
 	</style>
 </head>
 <body>
@@ -17,10 +20,10 @@
 
 <form action="/drivers" method="post">
 	<label for="driver_id">Id
-	<input name="driver_id" type="text" placeholder="driver_id">
+		<input name="driver_id" type="text" placeholder="driver_id">
 	</label>
 	<label for="name">Nombre
-	<input name="name" type="text" placeholder="Nombre">
+		<input name="name" type="text" placeholder="Nombre">
 	</label>
 	<button type="submit">Add</button>
 </form>
@@ -28,20 +31,26 @@
 <table>
 	<thead>
 		<tr>
-			<th>actions</th>
 			<th>Driver_id</th>
 			<th>Name</th>
+			<th>Country</th>
 		</tr>
 	</thead>
 <tbody>
 	% for driver in drivers:
 	<tr>
-       <td><button>x</button></td>
        <td>{{driver.driver_id}}</td>
        <td>{{driver.name}}</td>
+       <td>{{driver.country}}</td>
 	</tr>
 	% end
 </tbody>
 </table>
+
+<h2>Upload drivers</h2>
+<form enctype="multipart/form-data" action="/drivers/upload" method="post">
+	<p>File: <input type="file" name="drivers"></p>
+	<p><input type="submit" value="Upload"></p>
+</form>
 </body>
 </html>

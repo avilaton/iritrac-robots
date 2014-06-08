@@ -176,46 +176,34 @@ def updateAll():
         updateDriver(connection, driver.driver_id)
 
 def createDrivers():
-    #drivers = [1,2,3,4,5,7,8,9,10,11,14,15,16,17,18,19,20,21,22,23,24,26,
-        #27,28,29,31,33,34,35,36,37,38,39,40,41,42,43,44,45,101,102,103,104,
-        #105,106,107,109,110,111,112,114,115,116,117,118,119,120,123,124,125,
-        #126,127,301,302,303,304,305,306,307,308,309,310,311,312,313,314,316,319,321]
-    doc = xlrd.open_workbook("largada1.xls") #abro el .xls
-    sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
+    db = session
+    headers = ['orden', 'driver_id', 'name', 'country', 'starttime']
+    dictArray = xlsParser(file('largada.xlsx').read(), headers=headers).toDictArray()
+    # Empty dable before loading drivers
+    db.query(Driver).delete()
+    drivers = []
+    for item in dictArray:
+        drivers.append(Driver(
+            id=int(item['orden']),
+            driver_id=int(item['driver_id']), 
+            name=item['name'],
+            country=item['country']))
+    db.add_all(drivers)
+    db.flush()
 
-    ncols = sheet.ncols
-    nrows = sheet.nrows
-    
-    for i in range(nrows):
-        
-        group = sheet.cell (i,1)
-        name = sheet.cell (i,2)
-        
-        #print id_corr.value, " ", grupo.value, " ", nombre.value," ", pais.value, " ", tiempo.value
-        driver = Driver(id=i, driver_id=int(group.value), name=name.value)
-        try:
-            session.add(driver)
-        except:    
-            session.merge(driver)
-    session.commit()
 def create_stage():
     zone_name_1 = ["k30","k54","K112","CP1","DZ186","K230","ASS1"]#vector que luego se cargaria desde un excel
     zone_name_2 = ["DZ35","K64","K104","K123","ASS2"]
     zone_name_prueba = ["BIVLC","K96"]
-    #for j in range(len(zone_name_1)):
-        #stage = Stage(id=j+1,stage_id=1,zone=zone_name_1[j])
-        #session.add(stage)
-    #session.commit()
-    #i = 0
-    #for j in range(len(zone_name_2)):
-        #stage = Stage(id=(j+len(zone_name_1)+1),stage_id=2,zone=zone_name_2[i])
-        #session.add(stage)
-        #i += 1
-    #session.commit()
-    for j in range(len(zone_name_1)):
-        stage = Stage(id=j+1,stage_id=1,zone=zone_name_1[j])
+
+    for i, zone in enumerate(zone_name_1):
+        stage = Stage(stage_id=1,zone=zone)
+        session.add(stage)
+    for i, zone in enumerate(zone_name_2):
+        stage = Stage(stage_id=2,zone=zone)
         session.add(stage)
     session.commit()
+
 def time_of_drivers():
     doc = xlrd.open_workbook("largada1.xls") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
@@ -325,20 +313,21 @@ def time_stage_zone():
         #print "Vehicle:",vehicle_num,"; Start Time:", start_time[1], "; Time Arrive BIVLC:",vector_dateperzone[0],"; Result BIVLC:",vector_result[0], ";Time Arrive K96:",vector_result[1] 
 
 if __name__ == '__main__':
-    #flag= raw_input("Desea introducir una nueva fecha (s/n): ") #ACA SE PUEDE PONER QUE SI YA EXISTE UN BD Y QUE NO ESTE VACIA, DIRECTAMENTE HAGA UN UPDATE
-    #if flag == 's':
-    #firstFetch()
-    #else:
-        #updateAll()
+    # Cargar datos
     print "Creando drivers"
-    #createDrivers()    
+    createDrivers()
     print "Fin. Creando StartTime"
     #time_of_drivers()
     print "Fin. Creando Stage"
-    #create_stage()
+    create_stage()
     print "Fin. First firstFetch"
+    
+    # Correr updates
     #firstFetch()
+    #updateAll()
+
+    # pruebas
+    print "Fin. Creoando Stage"
+    # time_stage_zone()
     #test_parsing()
     #test_query()
-    print "Fin. Creoando Stage"
-    time_stage_zone()
