@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+	<Folder>
+		<name>LA-CUMBRE-2014-v2_478</name>
+		<open>1</open>
+		<NetworkLink>
+			<name>Tracking</name>
+			<open>1</open>
+			<refreshVisibility>0</refreshVisibility>
+			<Link>
+				<href>http://tracking.iritrack.com/tdcom/iriviewerng/system/link_public.php</href>
+				<httpQuery>login=RUTA1&amp;pass=4ddcff7e63a5f84627ae45b311da3a5a&amp;timezone=-3&amp;idgroup=642&amp;guid={81b3f3eb-74c1-4630-9a88-70e741da6cb5478}</httpQuery>
+				<refreshMode>onInterval</refreshMode>
+				<refreshInterval>60</refreshInterval>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>Race</name>
+			<open>0</open>
+			<refreshVisibility>0</refreshVisibility>
+			<Link>
+				<href>http://tracking.iritrack.com/tdcom/iriviewerng/system/racetrace.php</href>
+				<httpQuery>login=RUTA1&amp;pass=4ddcff7e63a5f84627ae45b311da3a5a&amp;idgroup=642&amp;guid={81b3f3eb-74c1-4630-9a88-70e741da6cb5478}</httpQuery>
+				<refreshMode>onInterval</refreshMode>
+				<refreshInterval>300</refreshInterval>
+			</Link>
+		</NetworkLink>
+	</Folder>
+</kml>
+
