@@ -32,7 +32,6 @@ def index(db):
         Stagezone = str(zone[i]).split("'")
         vector_zone.append(Stagezone[1])
     #con esto logre tener en vectores los alpha,drivers y las zonas dependiendo de la etapa    
-    print vector_alpha, " ", vector_driver, " ", vector_zone
     for i in range (len(vector_driver)):
         #Agarra un alpha y pregunta por todas las zonas, sig alpha y pregunta de vuelta por todas las zonas
         vehicle_num = vector_driver[i]
@@ -53,7 +52,16 @@ def index(db):
                 else:
                     date_per_zone=str(date_per_zone[0]).split("'")
                     date_per_zone = datetime.strptime(date_per_zone[0], '%Y-%m-%d %H:%M:%S')
-                    date_zone = str(date_per_zone.hour) + ":" + str(date_per_zone.minute) + ":" + str(date_per_zone.second)  
+                    hora_zona = str(date_per_zone.hour)
+                    minuto_zona = str(date_per_zone.minute)
+                    segundo_zona = str(date_per_zone.second)
+                    if len(hora_zona) == 1:
+                        hora_zona= "0" + hora_zona
+                    if len(minuto_zona) == 1:
+                        minuto_zona= "0" + minuto_zona
+                    if len(segundo_zona) == 1:
+                        segundo_zona= "0" + segundo_zona
+                    date_zone = hora_zona + ":" + minuto_zona + ":" + segundo_zona    
                     vector_dateperzone.append(date_zone)
                     result = date_per_zone - start_time_tmp
                     result =  str(result).split(",")

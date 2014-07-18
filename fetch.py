@@ -29,7 +29,7 @@ def FechaDesde():
     #ano_desde = raw_input("Ano Desde en ""YYYY"": ")
     #hora_desde = raw_input("Hora Desde en ""HH"": ")
     #minuto_desde = raw_input("Minuto Desde en ""mm"": ")
-    dia_desde='06'
+    dia_desde='07'
     mes_desde='06'
     ano_desde='2014'
     hora_desde = '00'
@@ -38,6 +38,7 @@ def FechaDesde():
     t = datetime.strptime(fecha_desde, '%d/%m/%Y %H:%M')
     t = t - timedelta(hours=3) #Convierto a UTC - 3
     timeunix = mktime(t.timetuple())
+    print "########### Desde",timeunix
     return timeunix
 
 def FechaHasta():
@@ -46,15 +47,16 @@ def FechaHasta():
     #ano_hasta = raw_input("Ano Hasta en ""YYYY"": ")
     #hora_hasta = raw_input("Hora Hasta en ""HH"": ")
     #minuto_hasta = raw_input("Minuto Hasta ""mm"": ")
-    dia_hasta='06'
+    dia_hasta='07'
     mes_hasta='06'
     ano_hasta='2014'
-    hora_hasta = '23'
+    hora_hasta = '17'
     minuto_hasta='23'
     fecha_hasta = dia_hasta+ '/' + mes_hasta + '/' + ano_hasta + " " + hora_hasta + ':' + minuto_hasta
     t = datetime.strptime(fecha_hasta, '%d/%m/%Y %H:%M')
     t = t - timedelta(hours=3) #Convierto a UTC - 3
     timeunix = mktime(t.timetuple())
+    print "################# hasta",timeunix
     return timeunix
 
 def FechaUpdate():
@@ -88,6 +90,7 @@ def insertRows(rows, vehicle):
         data.event = r['event']
         data.zone = r['zone']
         data.vehicle = vehicle
+        print "##########3",data
         session.add(data)
     session.commit()
     
@@ -192,7 +195,7 @@ def createDrivers():
     db.flush()
 
 def create_stage():
-    zone_name_1 = ["k30","k54","K112","CP1","DZ186","K230","ASS1"]#vector que luego se cargaria desde un excel
+    zone_name_1 = ["K30","K54","K112","CP1","DZ186","K230","ASS1"]#vector que luego se cargaria desde un excel
     zone_name_2 = ["DZ35","K64","K104","K123","ASS2"]
     zone_name_prueba = ["BIVLC","K96"]
 
@@ -205,7 +208,7 @@ def create_stage():
     session.commit()
 
 def time_of_drivers():
-    doc = xlrd.open_workbook("largada1.xls") #abro el .xls
+    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
@@ -217,7 +220,7 @@ def time_of_drivers():
         
         group = sheet.cell (i,1)
         name = sheet.cell (i,2)
-        timecell = sheet.cell (i,3)
+        timecell = sheet.cell (i,4)
 
         year, month, day, hour, minute, second = xlrd.xldate_as_tuple(timecell.value, book_datemode) #separo la fecha de la celda del excel
         
@@ -315,7 +318,7 @@ def time_stage_zone():
 if __name__ == '__main__':
     # Cargar datos
     print "Creando drivers"
-    createDrivers()
+    #createDrivers()
     print "Fin. Creando StartTime"
     #time_of_drivers()
     print "Fin. Creando Stage"

@@ -6,7 +6,10 @@ from server.services import xlsParser
 
 @app.route('/drivers')
 def index(db):
-	rows = db.query(Driver).all()
+	try:
+		rows = db.query(Driver).all()
+	except:
+		flag=1
 	return template('drivers.html', drivers=rows)
 
 @app.route('/drivers', method='POST')

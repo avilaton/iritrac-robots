@@ -1,37 +1,55 @@
 <html>
 <head>
 	<style>
-		table, th, tr, td {
-			border: 1px solid #ccc;
+	table
+		{
+			border-collapse: collapse;
 		}
+		table, th, tr, td 
+		{
+			border: 2px solid #ccc;
+		}
+		p.title {background-color: bisque;}
 	</style>
 </head>
 <body>
 	<a href="/">Home</a>
 	<a href="/drivers">Corredores</a>
-	<a href="/zones">Zonas</a>
-	<a href="/stages">Etapas</a>
+	<a href="/starttimes">Tiempos de Largada</a>
+	<a href="/stage">Etapas</a>
 	<a href="/resultado">Resultados</a>
 	
-<h1>Tiempos de Largada</h1>
-
-<table>
-	<thead>
-		<tr>
-			<th>Actions</th>
-			<th>Name</th>
-			<th>StartTime</th>
-		</tr>
-	</thead>
-<tbody>
-	% for item in rows:
+<h1 align="center">Tiempos de Largada</h1>
+<table align="center">
 	<tr>
-       <td><button>x</button></td>
-       <td>{{item.start_time}}</td>
-       <td>{{item.name}}</td>
+		<td valign="top"> <h2>Upload Time of Drivers</h2>
+						<form enctype="multipart/form-data" action="/starttimes/upload" method="post">
+						<p>File: <input type="file" name="starttimes"></p>
+						<p><input type="submit" value="Upload"></p>
+						</form> 
+		</td>
+		<td>
+
+			<table>
+				<thead>
+					<tr>
+						<th><p class="title">Driver_id</p></th>
+						<th><p class="title">Name</p></th>
+						<th><p class="title">StartTime</p></th>
+					</tr>
+				</thead>
+			<tbody>
+				% for item in rows:
+				<tr>
+			       <td>{{item.driver_group}}</td>
+			       <td>{{item.start_time}}</td>
+			       <td>{{item.name}}</td>
+				</tr>
+				% end
+			</tbody>
+			</table>
+		</td>
 	</tr>
-	% end
-</tbody>
-</table>
+</table>	
 </body>
 </html>

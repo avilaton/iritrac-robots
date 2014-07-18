@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import xlrd
-
+from time import mktime
+from datetime import *
+from server.models import StartTime
 class xlsParser(object):
 	"""docstring for Parser"""
 
@@ -25,3 +27,8 @@ class xlsParser(object):
 			dictArray.append({k:row[j] for j,k in enumerate(headers)})
 			
 		return dictArray
+
+	def toStartTime(self):
+		sheet = self.doc #Selecciono la hoja uno
+
+		return sheet

@@ -1,0 +1,55 @@
+<html>
+<head>
+	<style>
+	table
+		{
+			border-collapse: collapse;
+		}
+	table, th, tr, td 
+		{
+			border: 2px solid #ccc;
+		}
+	p.title {background-color: bisque;}
+	</style>
+</head>
+<body>
+	<a href="/">Home</a>
+	<a href="/drivers">Corredores</a>
+	<a href="/starttimes">Tiempos de Largada</a>
+	<a href="/stage">Etapas</a>
+	<a href="/resultado">Resultados</a>
+	<h1></h1>
+	
+				<form action="/stage" method="post">
+					<label for="name">Stage_id
+						<input name="stage_id" type="text" placeholder="Stage_id">
+					</label>
+					<label for="name">Zone
+						<input name="zone" type="text" placeholder="Zone">
+					</label>
+					<button type="submit">Add</button>
+				</form> 
+			
+	<h1>Stages</h1>
+				<table border="1" bordercolor="#ccc">
+					<thead>
+						<tr>
+							<th><p class="title">Stage</p></th>
+							<th><p class="title">Zone</p></th>
+							
+						</tr>
+					</thead>
+				<tbody>
+					% for zone in zones:
+					<tr>
+				       <td>{{zone.stage_id}}</td>
+				       <td>{{zone.zone}}</td>
+				       
+					</tr>
+					% end
+				</tbody>
+				</table>
+			
+		
+</body>
+</html>

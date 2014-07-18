@@ -1,22 +1,25 @@
 <html>
 <head>
 	<style>
-	table{
-		border-collapse: collapse;
-	}
-	table, th, tr, td {
-		border: 1px solid #ccc;
-	}
+	table
+		{
+			border-collapse: collapse;
+		}
+	table, th, tr, td 
+		{
+			border: 2px solid #ccc;
+		}
+	p.title {background-color: bisque;}
 	</style>
 </head>
 <body>
 	<a href="/">Home</a>
 	<a href="/drivers">Corredores</a>
-	<a href="/zones">Zonas</a>
-	<a href="/stages">Etapas</a>
+	<a href="/starttimes">Tiempos de Largada</a>
+	<a href="/stage">Etapas</a>
 	<a href="/resultado">Resultados</a>
 	
-<h1>Corredores</h1>
+<!--<h1>Corredores</h1>
 
 <form action="/drivers" method="post">
 	<label for="driver_id">Id
@@ -26,31 +29,41 @@
 		<input name="name" type="text" placeholder="Nombre">
 	</label>
 	<button type="submit">Add</button>
-</form>
+</form> -->
 
-<table>
-	<thead>
-		<tr>
-			<th>Driver_id</th>
-			<th>Name</th>
-			<th>Country</th>
-		</tr>
-	</thead>
-<tbody>
-	% for driver in drivers:
+<table border="1" cellspacing="10" align ="center">
+	<h1 align="center">Corredores</h1>
 	<tr>
-       <td>{{driver.driver_id}}</td>
-       <td>{{driver.name}}</td>
-       <td>{{driver.country}}</td>
+		<td valign="top"> <h2>Upload drivers</h2>
+						<form enctype="multipart/form-data" action="/drivers/upload" method="post">
+						<p>File: <input type="file" name="drivers"></p>
+						<p><input type="submit" value="Upload"></p>
+						</form>
+		</td>
+
+		<td>
+			<table border="1" bordercolor="#ccc">
+				<thead>
+					<tr>
+						<th><p class="title">Driver_id</p></th>
+						<th><p class="title">Name</p></th>
+						<th><p class="title">Country</p></th>
+					</tr>
+				</thead>
+			<tbody>
+				% for driver in drivers:
+				<tr>
+			       <td>{{driver.driver_id}}</td>
+			       <td>{{driver.name}}</td>
+			       <td>{{driver.country}}</td>
+				</tr>
+				% end
+			</tbody>
+			</table>
+		</td>
 	</tr>
-	% end
-</tbody>
 </table>
 
-<h2>Upload drivers</h2>
-<form enctype="multipart/form-data" action="/drivers/upload" method="post">
-	<p>File: <input type="file" name="drivers"></p>
-	<p><input type="submit" value="Upload"></p>
-</form>
+
 </body>
 </html>
