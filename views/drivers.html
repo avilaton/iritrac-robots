@@ -38,12 +38,17 @@
 						<form enctype="multipart/form-data" action="/drivers/upload" method="post">
 						<p>File: <input type="file" name="drivers"></p>
 						<p><input type="submit" value="Upload"></p>
+						<label for="name">Stage Id
+								<input name="stage_id" type="text" value="1">
+						</label>
+
 						</form>
 		</td>
 
 		<td>
 			<table border="1" bordercolor="#ccc">
 				<thead>
+					<tr><th colspan="3"><p class="title">Stage Id Nº: {{stage_id}}</p></th></tr>
 					<tr>
 						<th><p class="title">Driver_id</p></th>
 						<th><p class="title">Name</p></th>

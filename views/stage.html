@@ -10,14 +10,20 @@
 			border: 2px solid #ccc;
 		}
 	p.title {background-color: bisque;}
+
+	<style type="text/css">
+	a.menus:link {text-decoration:none; color: #000000; background: #E6E6E6;  1px solid;} /* Link no visitado*/
+	a.menus:visited {text-decoration:none; color:#000000} /*Link visitado*/
+	a.menus:active {text-decoration:none; color: #000000; background: #993333; border:#FFFFFF 1px solid;} /*Link activo*/
+	a.menus:hover {text-decoration:underline; color: #000000; background: #848484; border:#FFFFFF 1px solid;} /*Mause sobre el link*/
+</style>
 	</style>
 </head>
 <body>
-	<a href="/">Home</a>
-	<a href="/drivers">Corredores</a>
-	<a href="/starttimes">Tiempos de Largada</a>
-	<a href="/stage">Etapas</a>
-	<a href="/resultado">Resultados</a>
+	<a href="/" class="menus">Home</a>
+			<a href="/starttimes" class="menus">Tiempos de Largada</a>
+			<a href="/stage" class="menus">Etapas</a>
+			<a href="/resultado" class="menus">Resultados</a>
 	<h1></h1>
 	
 				<form action="/stage" method="post">

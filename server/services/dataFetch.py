@@ -10,7 +10,8 @@ import cookielib
 import sqlite3
 from time import mktime
 from datetime import *
-
+from bottle import template, request,redirect
+from server import app
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from server import engine
@@ -29,6 +30,7 @@ class dataFetch(object):
     def __init__(self, fecha_desde, fecha_hasta):
         self.fecha_desde = fecha_desde
         self.fecha_hasta = fecha_hasta
+        
 
     def parseXls(self,xlsFileObject):
         headers = ['alpha', 'date', 'lat', 'lon', 'speed', 'altitude', 'event', 'zone']
@@ -41,7 +43,6 @@ class dataFetch(object):
         for r in rows:
             data = Data(date=r['date'], lat=r['lat'], lon=r['lon'])
             data.alpha = r['alpha']
-            print "#############3ELLL ALLPHAAA",data.alpha
             data.speed = r['speed']
             data.altitude = r['altitude']
             data.event = r['event']
@@ -93,12 +94,11 @@ class dataFetch(object):
         fecha_hasta = self.fecha_hasta
         session.query(Data).delete()
         
-        for driver in session.query(Driver).all():
+        for driver in session.query(Driver).filter(Driver.stage_id==1).all():
             try:
                 print "Corredor: ",driver.driver_id
                 xls = self.downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_id)
                 rows = self.parseXls(xls)
-                print "######################",rows
                 self.insertRows(rows, driver.driver_id)
             except:
                 print "Corredor: ",driver.driver_id, "no esta en la pagina"
@@ -108,6 +108,8 @@ class dataFetch(object):
         connection = self.login()
         for driver in session.query(Driver).all():
             self.updateDriver(connection, driver.driver_id)
+            #self.show(driver.driver_id)
+            
 
 
     def updateDriver(self,opener, driver_id):
@@ -155,6 +157,11 @@ class dataFetch(object):
         timeunix2 = mktime(fecha.timetuple())
         newfecha.append(timeunix2)
         return newfecha
+
+    def show(self, driver):
+        print "######################################################3333333"
+        redirect('/actualizando')
+
 
         
             

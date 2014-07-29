@@ -195,9 +195,11 @@ def createDrivers():
     db.flush()
 
 def create_stage():
-    zone_name_1 = ["K30","K54","K112","CP1","DZ186","K230","ASS1"]#vector que luego se cargaria desde un excel
-    zone_name_2 = ["DZ35","K64","K104","K123","ASS2"]
-    zone_name_prueba = ["BIVLC","K96"]
+    zone_name_1=["E1DZ37","E1CP1","E1K66","E1IN","E1FN","E1K174","E1K214","E1CP2","E1K289","E1K328","E1K363","E1ASS"]
+    zone_name_2=["E2K58","E2IN","E2FN","E2K158","E2K200","E2K261","E2ASS"]
+    zone_name_3 = ["E3K3","E3K60","E3CP2","E3IN","FUEL","E3FN","E3K211","E3K260","E3K315","E3K350","ASS3"]#vector que luego se cargaria desde un excel
+    zone_name_4 = ["E4K47","E4K101","E4CP1","E4K133","ASS4"]
+   
 
     for i, zone in enumerate(zone_name_1):
         stage = Stage(stage_id=1,zone=zone)
@@ -205,6 +207,13 @@ def create_stage():
     for i, zone in enumerate(zone_name_2):
         stage = Stage(stage_id=2,zone=zone)
         session.add(stage)
+    for i, zone in enumerate(zone_name_3):
+        stage = Stage(stage_id=3,zone=zone)
+        session.add(stage)
+    for i, zone in enumerate(zone_name_4):
+        stage = Stage(stage_id=4,zone=zone)
+        session.add(stage)
+    
     session.commit()
 
 def time_of_drivers():
