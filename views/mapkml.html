@@ -1,0 +1,19 @@
+%include('base.html')
+<div class="panel panel-default">
+ 
+		  <div class="panel-heading"><b>Upload File of Stage</b></div>
+		  	<div class="panel-body">
+		   		<form enctype="multipart/form-data" action="/mapkml" method="post">
+					<p><input type="file" name="map"></p>
+					<input type="submit" value="Upload">
+					</label>
+				</form>
+		  </div>
+
+		  % if flagFile:
+		  <h3> archivo subido con exito</h3>
+
+		  %elif flagFile == False:
+		  <h3>Archivo incorrecto. Verifique</h3>
+		  %else:
+		  <h3>Suba el archivo</h3>

@@ -1,0 +1,202 @@
+
+    %namezone = []
+    %for i in zonename:
+        %namezone.append(i)
+    %end
+
+    %lastzona = []
+    %for i in zonalast:
+        %lastzona.append(i)
+    %end
+    %lasttimezona = []
+    %for i in tiempolast:
+        %lasttimezona.append(i)
+    %end
+    
+    %resulttime = []
+    %for i in timeresult:
+        %resulttime.append(i)
+    %end
+
+    %resultzone = []
+    %for i in zoneresult:
+        %resultzone.append(i)
+    %end
+
+    %vehicle = []
+    %for i in vehiculo:
+        %vehicle.append(i)
+    %end
+
+    %starttime = []
+    %for i in startime:
+        %starttime.append(i)
+    %end
+%col = 2 + (len(namezone))*2
+
+%include('base2.html')
+<html>
+<head>
+    <style>
+
+    .header-fixed {
+    width: 100% 
+}
+
+.header-fixed > thead,
+.header-fixed > tbody,
+.header-fixed > thead > tr,
+.header-fixed > tbody > tr,
+.header-fixed > thead > tr > th,
+.header-fixed > tbody > tr > td {
+    display: block;
+}
+
+.header-fixed > tbody > tr:after,
+.header-fixed > thead > tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+.header-fixed > tbody {
+    overflow-y: auto;
+    height: 150px;
+}
+
+.header-fixed > tbody > tr > td,
+.header-fixed > thead > tr > th {
+    width: 20%;
+    float: left;
+}
+    </style>
+    <script language="Javascript">  
+        function mostrar(nombreCapa){  
+        document.getElementById(nombreCapa).style.visibility="visible";  
+        }  
+        function ocultar(nombreCapa){  
+        document.getElementById(nombreCapa).style.visibility="hidden";  
+        }  
+    </script>
+<script language="Javascript">
+    function redireccionar() {
+        setTimeout(function(){
+
+                                if (document.getElementById("acepto").checked)
+                                {
+                                    location.href='/resultado/update/{{stage_id}}/True';
+                                }
+
+                             }, "600000");
+    }
+
+    </script>
+    <script language="javascript">
+
+function mostrarFormulario(id)
+{
+    var contenedor=document.getElementById(id);
+    contenedor.style.display="block";
+}
+</script>
+
+<!--<META HTTP-EQUIV="REFRESH" CONTENT="30;URL=/resultado/update/{{stage_id}}"> -->
+</head>
+    
+<body onload="redireccionar()">
+     
+    <div class="panel panel-default">
+
+      <div class="panel-heading"><b>Result from Drivers</b></div>
+        <div class="panel-body">
+            %if flagloop == "update":
+            <div align="center"><i>Complete: {{searching}}%</i></div>
+            %end
+            <span>
+            <form action="/resultado/update/{{stage_id}}/True" method="post" style="display:inline">
+                <i><input type="submit" value="Update Now" onclick="mostrarFormulario('capa2')"></i> 
+            </form>
+            <form name="form1" onsubmit="return redireccionar()">
+            <span><input type="checkbox" name="acepto" id ="acepto" checked onClick="redireccionar()"><label for="acepto"><i>(The page will update every five minutes)</i><label></span>
+        </form>
+        </span>
+                <div style="display:none" id="capa2">
+                    <center><img align="center" src="/static/cargando2.gif"></center>
+                </div>
+            </div>
+        </div>
+                <span>
+                <form action="/resultado/show" method="post">
+                    <div  class="panel panel-default">
+                        <div class="panel-heading"><strong>Stage Id Nº:
+                        <input name="stage" type="text" size="1"  value="{{stage_id}}">
+                         <input id="capa1" type="submit" value="Search" onclick="mostrarFormulario('capa2')"></strong>
+                        <div style="text-align:right;"><b>Stage {{stage_id}} from {{count}}</b></div>    
+                    </div>
+                </form>     
+            </span>   
+             
+           <table class="table table-hover table-bordered table-condensed" align="center"> 
+           <thead align="center">         
+        <tr>
+            <th><b> Vehicle</b> </th>
+            <th><b>Start Time</b></th>
+            %for j in zonename:
+                <th colspan="4"><b> Stage {{j}}</b></th>
+            %end
+        </tr>
+
+        <tr>
+            <th>#</th>
+            <th>#</th>
+            %for a in range(len(namezone)):
+                <th>Arrive1</th>
+                <th>Dif1</th>
+                <th>Arrive2</th>
+                <th>Dif2</th>
+            %end
+        </tr>
+        </thead>
+        <tbody align="center"> 
+        %for q in range(len(vehicle)):
+            <tr>
+
+                <td>{{vehicle[q]}}</p></td>
+                <td>{{starttime[q]}}</p></td>
+                %for k in range(len(namezone)):
+                    % t = (q*len(namezone))+ k
+                    %if resulttime[t] == ' ':
+                        
+                        <td class="danger">{{resulttime[t]}}</td>
+                        <td class="danger">{{resultzone[t]}}</td>
+                        <td class="danger">{{lasttimezona[t]}}</td>
+                        <td class="danger">{{lastzona[t]}}</td>
+                    %else:
+            
+                        <td class="success">{{resulttime[t]}}</p></td>
+                        <td class="success">{{resultzone[t]}}</p></td>
+                        <td class="info">{{lasttimezona[t]}}</p></td>
+                        <td class="info">{{lastzona[t]}}</p></td>
+
+                    % end
+                %end
+        %end
+
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="/result/deletall">Delete All Data</a>
+    %if flagloop == 'date':
+        <script type="text/javascript">
+    window.location="/resultado/loop";
+    </script>
+    %end
+    %if flagloop == 'update':
+        <script type="text/javascript">
+    window.location="/resultado/update/{{stage_id}}/False";
+    </script>
+    %end
+</body>
+</html>

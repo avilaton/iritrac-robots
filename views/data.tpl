@@ -138,7 +138,7 @@ button.regular, .buttons a.regular{
 		<a href="/resultado" class="regular">Resultados</a>
 	</div>
 
-	<span>
+	<div>
 		<form action="/updaterep" method="post">
 			<button type="submit">Update Data</button> <i>Last Update {{fecha}}</i>
 		</form>
@@ -160,7 +160,7 @@ button.regular, .buttons a.regular{
 			<i>Hasta: </i> <input type="text" name="to" placeholder="YYYY-MM-DD">
 			<button type="submit" class="standar">Cargar</button>
 		</form>
-	</span>
+	</div>
 
 
 <table border="1">

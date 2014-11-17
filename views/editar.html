@@ -1,0 +1,42 @@
+%include('base.html')
+
+<form action="/starttimes/update" method="post">
+	<table>
+		<tr>
+			<td>
+				<label for="name">Driver Id
+					<input name="driverid" type="text" value="{{drivers.driver_group}}">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="name">Name
+					<input name="name" type="text" value="{{drivers.name}}">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="name">Start Time
+					<input name="startime" type="text" value="{{drivers.start_time}}">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="name">Stage
+					<input name="stage" type="text" value="{{drivers.stage_id}}">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="submit">Edit </button>
+			</td>
+		</tr>
+</form>
+
+
+    
+   

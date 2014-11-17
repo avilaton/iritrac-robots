@@ -18,7 +18,7 @@ DATABASE_URL = 'sqlite:///db.sqlite'
 
 Base = declarative_base()
 # engine = create_engine(DATABASE_URL)
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 
 from models import Data
 

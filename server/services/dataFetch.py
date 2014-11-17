@@ -30,7 +30,6 @@ class dataFetch(object):
     def __init__(self, fecha_desde, fecha_hasta):
         self.fecha_desde = fecha_desde
         self.fecha_hasta = fecha_hasta
-        
 
     def parseXls(self,xlsFileObject):
         headers = ['alpha', 'date', 'lat', 'lon', 'speed', 'altitude', 'event', 'zone']
@@ -52,26 +51,33 @@ class dataFetch(object):
         session.commit()
         
     def login(self):
-        COOKIEFILE = 'cookies.lwp'
-        # cj = cookielib.CookieJar()
-        # this cookie jar stores the login cookie to a file. Should be checked for existence, 
-        # and validity and if it is not valid, ask the user to login again.
-        cj = cookielib.LWPCookieJar(COOKIEFILE)
-        if os.path.isfile(COOKIEFILE):
-            cj.load()
+        flag = True
+        count = 0
+        while (flag):
+            try:
+                COOKIEFILE = 'cookies.lwp'
 
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+                cj = cookielib.LWPCookieJar(COOKIEFILE)
+                if os.path.isfile(COOKIEFILE):
+                    try:
+                        cj.load()
+                    except: 
+                        pass
 
-        #username = raw_input("Please enter your username: ")
-        #password = raw_input("Please enter your password: ")
-        username = 'ruta2'
-        password = 'DESAFIO'
-        query = {'username': username,'password': password,'valid': 'OK'}
-        data = urllib.urlencode(query) 
-        response = opener.open('http://tracking.iritrack.com/index.php', data)
-        html = response.read()
-        cj.save()
-        
+                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+                username = 'ruta2'
+                password = 'DESAFIO'
+                query = {'username': username,'password': password,'valid': 'OK'}
+                data = urllib.urlencode(query) 
+                response = opener.open('http://tracking.iritrack.com/index.php', data)
+                html = response.read()
+                cj.save()
+                flag = False
+            except:
+                if count == 10:
+                    flag = True
+                count += 1
+            
         return opener
 
     def downloadXls(self,opener,fecha_desde,fecha_hasta,vehiculo):
@@ -79,69 +85,75 @@ class dataFetch(object):
         'date_from':fecha_desde,'date_to':fecha_hasta,'time_from':fecha_desde,'time_to':fecha_hasta}
         data = urllib.urlencode(query)
         excelResponse = opener.open('http://tracking.iritrack.com/index.php?'+data)
+        
         try: 
             xls = excelResponse.read()
         except:
-            print "No se pudo leer o generar el archivo."
+            pass
         return xls
 
 
 
     def firstFetch(self):
-        
         connection = self.login()
         fecha_desde = self.fecha_desde
         fecha_hasta = self.fecha_hasta
         session.query(Data).delete()
-        
-        for driver in session.query(Driver).filter(Driver.stage_id==1).all():
+        drivers = session.query(StartTime.driver_group).filter(StartTime.stage_id==1).all()
+        for driver in drivers:
             try:
-                print "Corredor: ",driver.driver_id
-                xls = self.downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_id)
+                
+                xls = self.downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_group)
                 rows = self.parseXls(xls)
-                self.insertRows(rows, driver.driver_id)
+                self.insertRows(rows, driver.driver_group)
             except:
-                print "Corredor: ",driver.driver_id, "no esta en la pagina"
+                pass
 
 
     def updateAll(self):
         connection = self.login()
-        for driver in session.query(Driver).all():
-            self.updateDriver(connection, driver.driver_id)
+        for driver in session.query(StartTime).all():
+            
+            self.updateDriver(connection, driver.driver_group)
             #self.show(driver.driver_id)
             
 
 
-    def updateDriver(self,opener, driver_id):
+    def updateDriver(self, driver_id):
+        connection = self.login()
         vehiculo = driver_id
-        ultima_fecha = session.query(func.max(Data.date)).filter_by(vehicle=vehiculo).first()
-        print vehiculo, ultima_fecha
-        if ultima_fecha[0] is not None:
-            fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
-            fecha_desde = fecha_desde - timedelta(hours=3)
-            fecha_desde = fecha_desde + timedelta(seconds=1) #LE SUMO UN SEGUNDO PARA QUE BUSQUE UN SEGUNDO DPS DEL ULTIMO DATO
-            fecha_hasta = fecha_desde + timedelta(hours=5)
-            fecha_desde_unix = mktime(fecha_desde.timetuple())
-            fecha_hasta_unix = mktime(fecha_hasta.timetuple())
-            try:
-                xlsFileObject = self.downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
-                rows = self.parseXls(xlsFileObject)
-                self.insertRows(rows, vehiculo)
-            except:
-                print "No se registraron nuevos datos"
-        else:
-            print "Base de datos vacia"
-            fechas = []
-            fechas=self.FechaUpdate() #Si no tiene nada en la BD, busca en internet con la fecha de hoy desde las 0 hs hasta la hora actual
+        #ultima_fecha = session.query(func.max(Data.date)).filter_by(vehicle=vehiculo).first()
+        
+        # if ultima_fecha[0] is not None:
+        #     fecha_desde = datetime.strptime(ultima_fecha[0], '%Y-%m-%d %H:%M:%S')
+        #     fecha_desde = fecha_desde - timedelta(hours=3)
+        #     fecha_desde = fecha_desde + timedelta(seconds=1) #LE SUMO UN SEGUNDO PARA QUE BUSQUE UN SEGUNDO DPS DEL ULTIMO DATO
+        #     fecha_hasta = fecha_desde + timedelta(hours=5)
+        #     fecha_desde_unix = mktime(fecha_desde.timetuple())
+        #     fecha_hasta_unix = mktime(fecha_hasta.timetuple())
+        #     try:
+                
+        #         xlsFileObject = self.downloadXls(connection,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+        #         rows = self.parseXls(xlsFileObject)
+        #         self.insertRows(rows, vehiculo)
+        #     except:
+        #         pass
+        # else:
             
-            fecha_desde_unix= fechas[0]
-            fecha_hasta_unix=fechas[1]
-            try:
-                xlsFileObject = self.downloadXls(opener,fecha_desde_unix,fecha_hasta_unix,vehiculo)
-                rows = self.parseXls(xlsFileObject)
-                self.insertRows(rows, vehiculo)
-            except:
-                print "No se encotro informacion"
+        fechas = []
+        fechas=self.FechaUpdate() #Si no tiene nada en la BD, busca en internet con la fecha de hoy desde las 0 hs hasta la hora actual
+        
+        fecha_desde_unix= fechas[0]
+        fecha_hasta_unix=fechas[1]
+        #try:
+        xlsFileObject = self.downloadXls(connection,fecha_desde_unix,fecha_hasta_unix,vehiculo)
+        rows = self.parseXls(xlsFileObject)
+        session.query(Data).filter(Data.vehicle == vehiculo).delete()
+        print "borre"
+        self.insertRows(rows, vehiculo)        
+        #except:
+            #pass
+        return True
 
     def FechaUpdate(self):
         newfecha = []
@@ -149,19 +161,30 @@ class dataFetch(object):
         current_date=str(current_date) #convierto en string
         inicial_date = current_date + ' 00:00:00' #Le agrego la hora 00
         inicial_date = datetime.strptime(inicial_date,'%Y-%m-%d %H:%M:%S') #Convierto formato Fecha
+        
         timeunix1 = mktime(inicial_date.timetuple()) #convierto formato Unix
         newfecha.append(timeunix1)
         
         fecha =datetime.now().strftime('%Y-%m-%d %H:%M:%S') #Fecha y hora actual
         fecha = datetime.strptime(fecha,'%Y-%m-%d %H:%M:%S')
+        
         timeunix2 = mktime(fecha.timetuple())
         newfecha.append(timeunix2)
         return newfecha
 
-    def show(self, driver):
-        print "######################################################3333333"
-        redirect('/actualizando')
-
+   
+    def firstnewFetch(self,searchdriver):
+        connection = self.login()
+        fecha_desde = self.fecha_desde
+        fecha_hasta = self.fecha_hasta
+        
+        try:
+            xls = self.downloadXls(connection,fecha_desde,fecha_hasta, searchdriver)
+            rows = self.parseXls(xls)
+            self.insertRows(rows, searchdriver)
+        except:
+            pass
+        return True
 
         
             

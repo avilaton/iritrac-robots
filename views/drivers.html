@@ -1,74 +1,35 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<style>
-	table
-		{
-			border-collapse: collapse;
-		}
-	table, th, tr, td 
-		{
-			border: 2px solid #ccc;
-		}
-	p.title {background-color: bisque;}
-	</style>
+<title>titulo</title> 
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+ 
+<script type="text/javascript">
+//<![CDATA[
+function establecer(opcion){
+var seleccion = document.getElementById(opcion).checked;
+if(seleccion == false){
+document.getElementById(opcion).checked = true;
+}else{
+document.getElementById(opcion).checked = false;
+}
+}
+//]]>
+</script>
 </head>
 <body>
-	<a href="/">Home</a>
-	<a href="/drivers">Corredores</a>
-	<a href="/starttimes">Tiempos de Largada</a>
-	<a href="/stage">Etapas</a>
-	<a href="/resultado">Resultados</a>
-	
-<!--<h1>Corredores</h1>
-
-<form action="/drivers" method="post">
-	<label for="driver_id">Id
-		<input name="driver_id" type="text" placeholder="driver_id">
-	</label>
-	<label for="name">Nombre
-		<input name="name" type="text" placeholder="Nombre">
-	</label>
-	<button type="submit">Add</button>
-</form> -->
-
-<table border="1" cellspacing="10" align ="center">
-	<h1 align="center">Corredores</h1>
-	<tr>
-		<td valign="top"> <h2>Upload drivers</h2>
-						<form enctype="multipart/form-data" action="/drivers/upload" method="post">
-						<p>File: <input type="file" name="drivers"></p>
-						<p><input type="submit" value="Upload"></p>
-						<label for="name">Stage Id
-								<input name="stage_id" type="text" value="1">
-						</label>
-
-						</form>
-		</td>
-
-		<td>
-			<table border="1" bordercolor="#ccc">
-				<thead>
-					<tr><th colspan="3"><p class="title">Stage Id Nº: {{stage_id}}</p></th></tr>
-					<tr>
-						<th><p class="title">Driver_id</p></th>
-						<th><p class="title">Name</p></th>
-						<th><p class="title">Country</p></th>
-					</tr>
-				</thead>
-			<tbody>
-				% for driver in drivers:
-				<tr>
-			       <td>{{driver.driver_id}}</td>
-			       <td>{{driver.name}}</td>
-			       <td>{{driver.country}}</td>
-				</tr>
-				% end
-			</tbody>
-			</table>
-		</td>
-	</tr>
-</table>
-
-
+<form action="#">
+<p>Colores</p>
+<p>
+<label><input value="rojo" name="color" type="radio" onclick="establecer('manzana');"> Rojo</label> 
+<label><input value="verde" name="color" type="radio" onclick="establecer('sandia');"> Verde</label>
+</p>
+<p>Frutas</p>
+<p>
+<label><input value="manzana" name="fruta" id="manzana" type="radio">Manzana</label>
+<label><input value="2" name="fruta" id="sandia" type="radio">Sandia</label>
+</p>
+</form>
 </body>
 </html>

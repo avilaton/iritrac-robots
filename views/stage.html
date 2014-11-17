@@ -1,61 +1,54 @@
-<html>
-<head>
-	<style>
-	table
-		{
-			border-collapse: collapse;
-		}
-	table, th, tr, td 
-		{
-			border: 2px solid #ccc;
-		}
-	p.title {background-color: bisque;}
+%include('base.html')
 
-	<style type="text/css">
-	a.menus:link {text-decoration:none; color: #000000; background: #E6E6E6;  1px solid;} /* Link no visitado*/
-	a.menus:visited {text-decoration:none; color:#000000} /*Link visitado*/
-	a.menus:active {text-decoration:none; color: #000000; background: #993333; border:#FFFFFF 1px solid;} /*Link activo*/
-	a.menus:hover {text-decoration:underline; color: #000000; background: #848484; border:#FFFFFF 1px solid;} /*Mause sobre el link*/
-</style>
-	</style>
-</head>
-<body>
-	<a href="/" class="menus">Home</a>
-			<a href="/starttimes" class="menus">Tiempos de Largada</a>
-			<a href="/stage" class="menus">Etapas</a>
-			<a href="/resultado" class="menus">Resultados</a>
-	<h1></h1>
+		<div class="panel panel-default">
+ 
+		  <div class="panel-heading"><b>Upload File of Stage</b></div>
+		  	<div class="panel-body">
+		   		<form enctype="multipart/form-data" action="/stage/upload" method="post">
+					<p><input type="file" name="stage"></p>
+					<input type="submit" value="Upload">
+					</label>
+				</form>
+		  </div>
+ 
+% if flagFile:
+
+	<table class="table table-hover" align="center">
+				<thead align="center">	
+					
+		<tr>
+			<form action="/stage/show" method="post">
+				<div class="panel panel-default">
+					<div class="panel-heading"><strong>Stage Id Nº:
+		            <input name="stage" type="text" size="1"  value="{{stage_id}}">
+		            <input type="submit" value="Search"></strong><div style="text-align:right;"><b>Stage {{stage_id}} from {{count}}</b></div>
+            	</div>
+            	</div>
+        	</form>
+        	
+   		 </tr>
+   		</thead>
+   		<tbody align="center">
+   		 <tr>
+			<td><strong>Stage</strong></th>
+			<td><strong>Zone</strong></th>
+		</tr>
+			
+			% for zone in zones:
+			<tr>
+		       <td>{{zone.stage_id}}</td>
+		       <td>{{zone.zone}}</td>
+			</tr>
+			% end
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+	<a href="/stage/deletall">Delete All Stages</a>
 	
-				<form action="/stage" method="post">
-					<label for="name">Stage_id
-						<input name="stage_id" type="text" placeholder="Stage_id">
-					</label>
-					<label for="name">Zone
-						<input name="zone" type="text" placeholder="Zone">
-					</label>
-					<button type="submit">Add</button>
-				</form> 
-			
-	<h1>Stages</h1>
-				<table border="1" bordercolor="#ccc">
-					<thead>
-						<tr>
-							<th><p class="title">Stage</p></th>
-							<th><p class="title">Zone</p></th>
-							
-						</tr>
-					</thead>
-				<tbody>
-					% for zone in zones:
-					<tr>
-				       <td>{{zone.stage_id}}</td>
-				       <td>{{zone.zone}}</td>
-				       
-					</tr>
-					% end
-				</tbody>
-				</table>
-			
-		
-</body>
-</html>
+%else:
+
+<h3>Archivo incorrecto. Verifique</h3>
+
+%end

@@ -1,0 +1,2 @@
+180,6,5555 ,1,39,5,570,S,67,4,931,W,2,200,3000,0,0,True,True,False,False,8765,1,1,1,,True,False,False,True,False
+181,6,BIV2 ,2,39,5,708,S,67,4,821,W,2,200,3000,0,0,True,True,False,False,8765,2,1350,2,,True,False,False,True,False

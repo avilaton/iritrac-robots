@@ -29,8 +29,8 @@ def FechaDesde():
     #ano_desde = raw_input("Ano Desde en ""YYYY"": ")
     #hora_desde = raw_input("Hora Desde en ""HH"": ")
     #minuto_desde = raw_input("Minuto Desde en ""mm"": ")
-    dia_desde='07'
-    mes_desde='06'
+    dia_desde='23'
+    mes_desde='08'
     ano_desde='2014'
     hora_desde = '00'
     minuto_desde='00'
@@ -47,11 +47,11 @@ def FechaHasta():
     #ano_hasta = raw_input("Ano Hasta en ""YYYY"": ")
     #hora_hasta = raw_input("Hora Hasta en ""HH"": ")
     #minuto_hasta = raw_input("Minuto Hasta ""mm"": ")
-    dia_hasta='07'
-    mes_hasta='06'
+    dia_hasta='23'
+    mes_hasta='08'
     ano_hasta='2014'
-    hora_hasta = '17'
-    minuto_hasta='23'
+    hora_hasta = '23'
+    minuto_hasta='59'
     fecha_hasta = dia_hasta+ '/' + mes_hasta + '/' + ano_hasta + " " + hora_hasta + ':' + minuto_hasta
     t = datetime.strptime(fecha_hasta, '%d/%m/%Y %H:%M')
     t = t - timedelta(hours=3) #Convierto a UTC - 3
@@ -163,14 +163,18 @@ def firstFetch():
     connection = login()
     fecha_desde = FechaDesde()
     fecha_hasta = FechaHasta()
-    for driver in session.query(Driver).all():
+    print fecha_desde
+    print fecha_hasta
+    drivers = session.query(StartTime.driver_group).filter(StartTime.stage_id==1).all()
+    for driver in drivers:
         try:
-            print "Corredor: ",driver.driver_id
-            xls = downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_id)
+            
+            print "Corredor: ",driver.driver_group
+            xls = downloadXls(connection,fecha_desde,fecha_hasta, driver.driver_group)
             rows = parseXls(xls)
-            insertRows(rows, driver.driver_id)
+            insertRows(rows, driver.driver_group)
         except:
-            print "Corredor: ",driver.driver_id, "no esta en la pagina"
+            print "Corredor: ",driver.driver_group, "no esta en la pagina"
         
 
 def updateAll():
@@ -181,7 +185,7 @@ def updateAll():
 def createDrivers():
     db = session
     headers = ['orden', 'driver_id', 'name', 'country', 'starttime']
-    dictArray = xlsParser(file('largada.xlsx').read(), headers=headers).toDictArray()
+    dictArray = xlsParser(file('largada2.xlsx').read(), headers=headers).toDictArray()
     # Empty dable before loading drivers
     db.query(Driver).delete()
     drivers = []
@@ -194,30 +198,31 @@ def createDrivers():
     db.add_all(drivers)
     db.flush()
 
+
 def create_stage():
-    zone_name_1=["E1DZ37","E1CP1","E1K66","E1IN","E1FN","E1K174","E1K214","E1CP2","E1K289","E1K328","E1K363","E1ASS"]
-    zone_name_2=["E2K58","E2IN","E2FN","E2K158","E2K200","E2K261","E2ASS"]
-    zone_name_3 = ["E3K3","E3K60","E3CP2","E3IN","FUEL","E3FN","E3K211","E3K260","E3K315","E3K350","ASS3"]#vector que luego se cargaria desde un excel
-    zone_name_4 = ["E4K47","E4K101","E4CP1","E4K133","ASS4"]
+    #zone_name_1=["DSS1","E1K23","E1K51","E1K81","E1K123","INEU","FNEU","E1CP1","E1K320","ASS1"]
+    zone_name_2=["DSS2","E2K50","E2K83","ASS2"]
+    #zone_name_3 = ["E3K3","E3K60","E3CP2","E3IN","FUEL","E3FN","E3K211","E3K260","E3K315","E3K350","ASS3"]#vector que luego se cargaria desde un excel
+    #zone_name_4 = ["E4K47","E4K101","E4CP1","E4K133","ASS4"]
    
 
-    for i, zone in enumerate(zone_name_1):
-        stage = Stage(stage_id=1,zone=zone)
-        session.add(stage)
     for i, zone in enumerate(zone_name_2):
         stage = Stage(stage_id=2,zone=zone)
         session.add(stage)
-    for i, zone in enumerate(zone_name_3):
-        stage = Stage(stage_id=3,zone=zone)
-        session.add(stage)
-    for i, zone in enumerate(zone_name_4):
-        stage = Stage(stage_id=4,zone=zone)
-        session.add(stage)
+    # for i, zone in enumerate(zone_name_2):
+    #     stage = Stage(stage_id=2,zone=zone)
+    #     session.add(stage)
+    # for i, zone in enumerate(zone_name_3):
+    #     stage = Stage(stage_id=3,zone=zone)
+    #     session.add(stage)
+    # for i, zone in enumerate(zone_name_4):
+    #     stage = Stage(stage_id=4,zone=zone)
+    #     session.add(stage)
     
     session.commit()
 
 def time_of_drivers():
-    doc = xlrd.open_workbook("largada.xlsx") #abro el .xls
+    doc = xlrd.open_workbook("LARGADAE1.xlsx") #abro el .xls
     sheet = doc.sheet_by_index(0) #Selecciono la hoja uno
 
     ncols = sheet.ncols
@@ -331,11 +336,11 @@ if __name__ == '__main__':
     print "Fin. Creando StartTime"
     #time_of_drivers()
     print "Fin. Creando Stage"
-    create_stage()
+    #create_stage()
     print "Fin. First firstFetch"
     
     # Correr updates
-    #firstFetch()
+    firstFetch()
     #updateAll()
 
     # pruebas
